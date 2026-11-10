@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Đợt báo cáo -->
+    <record id="view_dotbaocao_tree" model="ir.ui.view">
+        <field name="name">quanly.dotbaocao.list</field>
+        <field name="model">quanly.dotbaocao</field>
+        <field name="arch" type="xml">
+            <list string="Đợt báo cáo tiến độ">
+                <field name="thu_tu"/>
+                <field name="ten_dot_bao_cao"/>
+                <field name="dot_do_an_id"/>
+                <field name="han_nop"/>
+                <field name="la_ban_cuoi"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_dotbaocao_form" model="ir.ui.view">
+        <field name="name">quanly.dotbaocao.form</field>
+        <field name="model">quanly.dotbaocao</field>
+        <field name="arch" type="xml">
+            <form string="Đợt nộp báo cáo">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="thu_tu"/>
+                            <field name="ten_dot_bao_cao"/>
+                            <field name="dot_do_an_id"/>
+                        </group>
+                        <group>
+                            <field name="han_nop"/>
+                            <field name="la_ban_cuoi"/>
+                        </group>
+                    </group>
+                    <group string="Nội dung yêu cầu nộp">
+                        <field name="noi_dung_yeu_cau" nolabel="1"/>
+                    </group>
+                    <notebook>
+                        <page string="Danh sách bài nộp của sinh viên">
+                            <field name="bao_cao_ids"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_dotbaocao" model="ir.actions.act_window">
+        <field name="name">Cấu hình Đợt báo cáo</field>
+        <field name="res_model">quanly.dotbaocao</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Nộp Báo cáo -->
+    <record id="view_baocao_tree" model="ir.ui.view">
+        <field name="name">quanly.baocao.list</field>
+        <field name="model">quanly.baocao</field>
+        <field name="arch" type="xml">
+            <list string="Danh sách bài nộp báo cáo">
+                <field name="de_tai_id"/>
+                <field name="dot_bao_cao_id"/>
+                <field name="phien_ban"/>
+                <field name="ten_tep"/>
+                <field name="ngay_nop"/>
+                <field name="nop_tre" widget="boolean"/>
+                <field name="trang_thai"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_baocao_form" model="ir.ui.view">
+        <field name="name">quanly.baocao.form</field>
+        <field name="model">quanly.baocao</field>
+        <field name="arch" type="xml">
+            <form string="Bài nộp báo cáo">
+                <header>
+                    <field name="trang_thai" widget="statusbar" statusbar_visible="dang_cho,dat,can_sua,khong_dat"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group string="Thông tin nộp bài">
+                            <field name="de_tai_id"/>
+                            <field name="dot_bao_cao_id"/>
+                            <field name="phien_ban"/>
+                            <field name="ngay_nop"/>
+                            <field name="nop_tre"/>
+                        </group>
+                        <group string="Tệp báo cáo đính kèm">
+                            <field name="ten_tep"/>
+                            <field name="file_bao_cao" filename="ten_tep"/>
+                            <field name="url_tep"/>
+                        </group>
+                    </group>
+                    <group string="Phản hồi / Nhận xét của Giảng viên hướng dẫn">
+                        <field name="phan_hoi_gvhd" nolabel="1" placeholder="Nhập ý kiến đánh giá tiến độ của sinh viên..."/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_baocao" model="ir.actions.act_window">
+        <field name="name">Quản lý Nộp Báo cáo</field>
+        <field name="res_model">quanly.baocao</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Menu Items -->
+    <menuitem id="menu_baocao" name="Nộp báo cáo tiến độ" parent="menu_sub_de_tai_root" action="action_baocao" sequence="30"/>
+    <menuitem id="menu_dotbaocao" name="Cấu hình đợt báo cáo" parent="menu_sub_de_tai_root" action="action_dotbaocao" sequence="40"/>
+</odoo>

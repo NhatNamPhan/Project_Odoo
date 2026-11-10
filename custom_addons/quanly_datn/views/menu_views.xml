@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Top-Level Main Menu -->
+    <menuitem id="menu_quanly_datn_root"
+              name="Quản Lý Đồ Án"
+              sequence="10"
+              web_icon="quanly_datn,static/description/icon.png"/>
+
+    <!-- Category 1: Đề tài & Tiến độ -->
+    <menuitem id="menu_sub_de_tai_root"
+              name="Đề Tài &amp; Tiến Độ"
+              parent="menu_quanly_datn_root"
+              sequence="10"/>
+
+    <!-- Category 2: Đợt đồ án & Đăng ký -->
+    <menuitem id="menu_sub_dot_doan_root"
+              name="Đợt Đồ Án"
+              parent="menu_quanly_datn_root"
+              sequence="20"/>
+
+    <!-- Category 3: Hội đồng & Chấm điểm -->
+    <menuitem id="menu_sub_hoi_dong_root"
+              name="Hội Đồng &amp; Chấm Điểm"
+              parent="menu_quanly_datn_root"
+              sequence="30"/>
+
+    <!-- Category 4: Tổ chức & Người dùng -->
+    <menuitem id="menu_sub_to_chuc_root"
+              name="Tổ Chức &amp; Người Dùng"
+              parent="menu_quanly_datn_root"
+              sequence="40"/>
+</odoo>

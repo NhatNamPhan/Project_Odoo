@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Chuyên ngành -->
+    <record id="view_chuyennganh_tree" model="ir.ui.view">
+        <field name="name">quanly.chuyennganh.list</field>
+        <field name="model">quanly.chuyennganh</field>
+        <field name="arch" type="xml">
+            <list string="Danh sách chuyên ngành">
+                <field name="ma_chuyen_nganh"/>
+                <field name="ten_chuyen_nganh"/>
+                <field name="mo_ta"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_chuyennganh_form" model="ir.ui.view">
+        <field name="name">quanly.chuyennganh.form</field>
+        <field name="model">quanly.chuyennganh</field>
+        <field name="arch" type="xml">
+            <form string="Chuyên ngành">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="ma_chuyen_nganh"/>
+                            <field name="ten_chuyen_nganh"/>
+                        </group>
+                        <group>
+                            <field name="mo_ta"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Danh sách Lớp sinh hoạt">
+                            <field name="lop_ids"/>
+                        </page>
+                        <page string="Danh sách Giảng viên">
+                            <field name="giang_vien_ids"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_chuyennganh" model="ir.actions.act_window">
+        <field name="name">Chuyên ngành đào tạo</field>
+        <field name="res_model">quanly.chuyennganh</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Lớp sinh hoạt -->
+    <record id="view_lopsinhhoat_tree" model="ir.ui.view">
+        <field name="name">quanly.lopsinhhoat.list</field>
+        <field name="model">quanly.lopsinhhoat</field>
+        <field name="arch" type="xml">
+            <list string="Lớp sinh hoạt">
+                <field name="ma_lop"/>
+                <field name="ten_lop"/>
+                <field name="chuyen_nganh_id"/>
+                <field name="nien_khoa"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_lopsinhhoat_form" model="ir.ui.view">
+        <field name="name">quanly.lopsinhhoat.form</field>
+        <field name="model">quanly.lopsinhhoat</field>
+        <field name="arch" type="xml">
+            <form string="Lớp sinh hoạt">
+                <sheet>
+                    <group>
+                        <field name="ma_lop"/>
+                        <field name="ten_lop"/>
+                        <field name="chuyen_nganh_id"/>
+                        <field name="nien_khoa"/>
+                    </group>
+                    <notebook>
+                        <page string="Sinh viên của lớp">
+                            <field name="sinh_vien_ids"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_lopsinhhoat" model="ir.actions.act_window">
+        <field name="name">Lớp sinh hoạt</field>
+        <field name="res_model">quanly.lopsinhhoat</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Sinh viên -->
+    <record id="view_sinhvien_tree" model="ir.ui.view">
+        <field name="name">quanly.sinhvien.list</field>
+        <field name="model">quanly.sinhvien</field>
+        <field name="arch" type="xml">
+            <list string="Danh sách sinh viên">
+                <field name="ma_sv"/>
+                <field name="ho_ten"/>
+                <field name="email"/>
+                <field name="sdt"/>
+                <field name="lop_sinh_hoat_id"/>
+                <field name="chuyen_nganh_id"/>
+                <field name="trang_thai"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_sinhvien_form" model="ir.ui.view">
+        <field name="name">quanly.sinhvien.form</field>
+        <field name="model">quanly.sinhvien</field>
+        <field name="arch" type="xml">
+            <form string="Thông tin sinh viên">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="user_id"/>
+                            <field name="ma_sv"/>
+                            <field name="ho_ten"/>
+                        </group>
+                        <group>
+                            <field name="email"/>
+                            <field name="sdt"/>
+                            <field name="lop_sinh_hoat_id"/>
+                            <field name="chuyen_nganh_id"/>
+                            <field name="trang_thai"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_sinhvien" model="ir.actions.act_window">
+        <field name="name">Hồ sơ Sinh viên</field>
+        <field name="res_model">quanly.sinhvien</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Giảng viên -->
+    <record id="view_giangvien_tree" model="ir.ui.view">
+        <field name="name">quanly.giangvien.list</field>
+        <field name="model">quanly.giangvien</field>
+        <field name="arch" type="xml">
+            <list string="Danh sách giảng viên">
+                <field name="ma_gv"/>
+                <field name="ho_ten"/>
+                <field name="hoc_ham_hoc_vi"/>
+                <field name="chuyen_nganh_id"/>
+                <field name="email"/>
+                <field name="sdt"/>
+                <field name="han_muc_huong_dan"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_giangvien_form" model="ir.ui.view">
+        <field name="name">quanly.giangvien.form</field>
+        <field name="model">quanly.giangvien</field>
+        <field name="arch" type="xml">
+            <form string="Thông tin giảng viên">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="user_id"/>
+                            <field name="ma_gv"/>
+                            <field name="ho_ten"/>
+                            <field name="hoc_ham_hoc_vi"/>
+                        </group>
+                        <group>
+                            <field name="chuyen_nganh_id"/>
+                            <field name="email"/>
+                            <field name="sdt"/>
+                            <field name="han_muc_huong_dan"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_giangvien" model="ir.actions.act_window">
+        <field name="name">Hồ sơ Giảng viên</field>
+        <field name="res_model">quanly.giangvien</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Menu Items -->
+    <menuitem id="menu_sinhvien" name="Sinh viên" parent="menu_sub_to_chuc_root" action="action_sinhvien" sequence="10"/>
+    <menuitem id="menu_giangvien" name="Giảng viên" parent="menu_sub_to_chuc_root" action="action_giangvien" sequence="20"/>
+    <menuitem id="menu_lopsinhhoat" name="Lớp sinh hoạt" parent="menu_sub_to_chuc_root" action="action_lopsinhhoat" sequence="30"/>
+    <menuitem id="menu_chuyennganh" name="Chuyên ngành" parent="menu_sub_to_chuc_root" action="action_chuyennganh" sequence="40"/>
+</odoo>

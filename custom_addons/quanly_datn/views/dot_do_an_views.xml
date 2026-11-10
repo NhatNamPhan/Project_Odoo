@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Đợt đồ án -->
+    <record id="view_dotdoan_tree" model="ir.ui.view">
+        <field name="name">quanly.dotdoan.list</field>
+        <field name="model">quanly.dotdoan</field>
+        <field name="arch" type="xml">
+            <list string="Đợt làm đồ án">
+                <field name="ma_dot"/>
+                <field name="ten_dot"/>
+                <field name="nien_khoa"/>
+                <field name="hoc_ky"/>
+                <field name="ngay_bat_dau"/>
+                <field name="ngay_bat_dau_bao_ve"/>
+                <field name="trang_thai"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_dotdoan_form" model="ir.ui.view">
+        <field name="name">quanly.dotdoan.form</field>
+        <field name="model">quanly.dotdoan</field>
+        <field name="arch" type="xml">
+            <form string="Đợt làm đồ án">
+                <header>
+                    <field name="trang_thai" widget="statusbar" statusbar_visible="chuan_bi,dang_dang_ky,dang_thuc_hien,dang_bao_ve,ket_thuc"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group string="Thông tin cơ bản">
+                            <field name="ma_dot"/>
+                            <field name="ten_dot"/>
+                            <field name="nien_khoa"/>
+                            <field name="hoc_ky"/>
+                        </group>
+                        <group string="Kế hoạch thời gian">
+                            <field name="ngay_bat_dau"/>
+                            <field name="ngay_bat_dau_bao_ve"/>
+                            <field name="ngay_ket_thuc_bao_ve"/>
+                        </group>
+                    </group>
+                    <group string="Trọng số cấu thành điểm tốt nghiệp">
+                        <group>
+                            <field name="trong_so_gvhd"/>
+                            <field name="trong_so_bao_cao"/>
+                        </group>
+                        <group>
+                            <field name="trong_so_do_an"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Danh sách Đăng ký">
+                            <field name="dang_ky_ids"/>
+                        </page>
+                        <page string="Ngân hàng đề tài đợt này">
+                            <field name="ngan_hang_de_tai_ids"/>
+                        </page>
+                        <page string="Cấu hình Đợt nộp báo cáo">
+                            <field name="dot_bao_cao_ids"/>
+                        </page>
+                        <page string="Hội đồng bảo vệ">
+                            <field name="hoi_dong_ids"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_dotdoan" model="ir.actions.act_window">
+        <field name="name">Đợt làm đồ án tốt nghiệp</field>
+        <field name="res_model">quanly.dotdoan</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Đăng ký đợt -->
+    <record id="view_dangky_tree" model="ir.ui.view">
+        <field name="name">quanly.dangky.list</field>
+        <field name="model">quanly.dangky</field>
+        <field name="arch" type="xml">
+            <list string="Danh sách đăng ký">
+                <field name="sinh_vien_id"/>
+                <field name="dot_do_an_id"/>
+                <field name="ngay_dang_ky"/>
+                <field name="trang_thai"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_dangky_form" model="ir.ui.view">
+        <field name="name">quanly.dangky.form</field>
+        <field name="model">quanly.dangky</field>
+        <field name="arch" type="xml">
+            <form string="Đăng ký đợt đồ án">
+                <header>
+                    <field name="trang_thai" widget="statusbar" statusbar_visible="cho_duyet,da_duyet,tu_choi"/>
+                </header>
+                <sheet>
+                    <group>
+                        <field name="sinh_vien_id"/>
+                        <field name="dot_do_an_id"/>
+                        <field name="ngay_dang_ky"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_dangky" model="ir.actions.act_window">
+        <field name="name">Đăng ký đợt đồ án</field>
+        <field name="res_model">quanly.dangky</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Ngân hàng đề tài -->
+    <record id="view_nganhangdetai_tree" model="ir.ui.view">
+        <field name="name">quanly.nganhangdetai.list</field>
+        <field name="model">quanly.nganhangdetai</field>
+        <field name="arch" type="xml">
+            <list string="Ngân hàng đề tài">
+                <field name="ten_de_tai"/>
+                <field name="dot_do_an_id"/>
+                <field name="chuyen_nganh_id"/>
+                <field name="loai_de_tai"/>
+                <field name="trang_thai"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_nganhangdetai_form" model="ir.ui.view">
+        <field name="name">quanly.nganhangdetai.form</field>
+        <field name="model">quanly.nganhangdetai</field>
+        <field name="arch" type="xml">
+            <form string="Đề tài đề xuất">
+                <header>
+                    <field name="trang_thai" widget="statusbar" statusbar_visible="du_thao,cho_duyet,da_duyet,da_chon,tu_choi"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="ten_de_tai"/>
+                            <field name="dot_do_an_id"/>
+                            <field name="chuyen_nganh_id"/>
+                        </group>
+                        <group>
+                            <field name="loai_de_tai"/>
+                            <field name="giang_vien_de_xuat_id" invisible="loai_de_tai != 'gv_de_xuat'"/>
+                            <field name="sinh_vien_de_xuat_id" invisible="loai_de_tai != 'sv_de_xuat'"/>
+                        </group>
+                    </group>
+                    <group string="Mô tả mục tiêu &amp; Yêu cầu">
+                        <field name="mo_ta" nolabel="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_nganhangdetai" model="ir.actions.act_window">
+        <field name="name">Ngân hàng Đề tài đề xuất</field>
+        <field name="res_model">quanly.nganhangdetai</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Menu Items -->
+    <menuitem id="menu_dotdoan" name="Đợt làm đồ án" parent="menu_sub_dot_doan_root" action="action_dotdoan" sequence="10"/>
+    <menuitem id="menu_dangky" name="Danh sách đăng ký" parent="menu_sub_dot_doan_root" action="action_dangky" sequence="20"/>
+    <menuitem id="menu_nganhangdetai" name="Ngân hàng đề tài" parent="menu_sub_dot_doan_root" action="action_nganhangdetai" sequence="30"/>
+</odoo>

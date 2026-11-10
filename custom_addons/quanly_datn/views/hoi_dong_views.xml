@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Hội đồng bảo vệ -->
+    <record id="view_hoidong_tree" model="ir.ui.view">
+        <field name="name">quanly.hoidong.list</field>
+        <field name="model">quanly.hoidong</field>
+        <field name="arch" type="xml">
+            <list string="Hội đồng chấm bảo vệ">
+                <field name="ma_hoi_dong"/>
+                <field name="ten_hoi_dong"/>
+                <field name="chuyen_nganh_id"/>
+                <field name="dot_do_an_id"/>
+                <field name="thoi_gian_bao_ve"/>
+                <field name="dia_diem"/>
+                <field name="trang_thai"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Calendar View trực quan cho Hội đồng bảo vệ (Mục tiêu quan trọng trong đề cương) -->
+    <record id="view_hoidong_calendar" model="ir.ui.view">
+        <field name="name">quanly.hoidong.calendar</field>
+        <field name="model">quanly.hoidong</field>
+        <field name="arch" type="xml">
+            <calendar string="Lịch bảo vệ đồ án tốt nghiệp"
+                      date_start="thoi_gian_bao_ve"
+                      color="chuyen_nganh_id"
+                      mode="month">
+                <field name="ten_hoi_dong"/>
+                <field name="dia_diem"/>
+                <field name="chuyen_nganh_id"/>
+            </calendar>
+        </field>
+    </record>
+
+    <record id="view_hoidong_form" model="ir.ui.view">
+        <field name="name">quanly.hoidong.form</field>
+        <field name="model">quanly.hoidong</field>
+        <field name="arch" type="xml">
+            <form string="Hội đồng bảo vệ">
+                <header>
+                    <field name="trang_thai" widget="statusbar" statusbar_visible="du_thao,da_chot_lich,dang_cham,hoan_thanh"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="ma_hoi_dong" string="Mã hội đồng"/>
+                        <h1>
+                            <field name="ma_hoi_dong" placeholder="VD: HD_CNTT_01"/>
+                        </h1>
+                        <label for="ten_hoi_dong" string="Tên hội đồng"/>
+                        <h2>
+                            <field name="ten_hoi_dong" placeholder="VD: Hội đồng bảo vệ ngành Công nghệ phần mềm đợt 1"/>
+                        </h2>
+                    </div>
+                    <group>
+                        <group string="Kế hoạch bảo vệ">
+                            <field name="thoi_gian_bao_ve"/>
+                            <field name="dia_diem"/>
+                        </group>
+                        <group string="Đơn vị tổ chức">
+                            <field name="chuyen_nganh_id"/>
+                            <field name="dot_do_an_id"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Thành viên Hội đồng">
+                            <field name="thanh_vien_ids">
+                                <list editable="bottom">
+                                    <field name="giang_vien_id"/>
+                                    <field name="vai_tro"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Danh sách Đề tài phân vào Hội đồng này">
+                            <field name="de_tai_ids"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_hoidong" model="ir.actions.act_window">
+        <field name="name">Hội đồng chấm bảo vệ</field>
+        <field name="res_model">quanly.hoidong</field>
+        <field name="view_mode">list,calendar,form</field>
+    </record>
+
+    <!-- Phiếu chấm điểm -->
+    <record id="view_phieuchamdiem_tree" model="ir.ui.view">
+        <field name="name">quanly.phieuchamdiem.list</field>
+        <field name="model">quanly.phieuchamdiem</field>
+        <field name="arch" type="xml">
+            <list string="Phiếu chấm điểm hội đồng">
+                <field name="de_tai_id"/>
+                <field name="giang_vien_id"/>
+                <field name="vai_tro"/>
+                <field name="diem_bao_cao"/>
+                <field name="diem_do_an"/>
+                <field name="trang_thai"/>
+                <field name="ngay_cham"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_phieuchamdiem_form" model="ir.ui.view">
+        <field name="name">quanly.phieuchamdiem.form</field>
+        <field name="model">quanly.phieuchamdiem</field>
+        <field name="arch" type="xml">
+            <form string="Phiếu chấm điểm đồ án">
+                <header>
+                    <field name="trang_thai" widget="statusbar" statusbar_visible="chua_cham,da_cham"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group string="Thông tin chấm">
+                            <field name="de_tai_id"/>
+                            <field name="hoi_dong_giang_vien_id"/>
+                            <field name="giang_vien_id"/>
+                            <field name="vai_tro"/>
+                        </group>
+                        <group string="Điểm đánh giá">
+                            <field name="diem_bao_cao"/>
+                            <field name="diem_do_an"/>
+                            <field name="ngay_cham"/>
+                        </group>
+                    </group>
+                    <group string="Nhận xét chi tiết của Cán bộ chấm thi">
+                        <field name="nhan_xet" nolabel="1" placeholder="Nhập nhận xét ưu/nhược điểm của đề tài và sinh viên..."/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_phieuchamdiem" model="ir.actions.act_window">
+        <field name="name">Phiếu chấm điểm ĐATN</field>
+        <field name="res_model">quanly.phieuchamdiem</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Menu Items -->
+    <menuitem id="menu_hoidong" name="Hội đồng bảo vệ (Lịch Calendar)" parent="menu_sub_hoi_dong_root" action="action_hoidong" sequence="10"/>
+    <menuitem id="menu_phieuchamdiem" name="Phiếu chấm điểm" parent="menu_sub_hoi_dong_root" action="action_phieuchamdiem" sequence="20"/>
+</odoo>
