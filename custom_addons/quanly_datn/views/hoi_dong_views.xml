@@ -143,3 +143,4 @@
     <menuitem id="menu_hoidong" name="Hội đồng bảo vệ (Lịch Calendar)" parent="menu_sub_hoi_dong_root" action="action_hoidong" sequence="10"/>
     <menuitem id="menu_phieuchamdiem" name="Phiếu chấm điểm" parent="menu_sub_hoi_dong_root" action="action_phieuchamdiem" sequence="20"/>
 </odoo>
+

@@ -39,3 +39,4 @@ Hệ thống Quản lý Đồ án Tốt nghiệp cho sinh viên Khoa Công ngh�
     'application': True,
     'auto_install': False,
 }
+

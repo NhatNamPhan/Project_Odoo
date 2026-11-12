@@ -31,3 +31,4 @@ access_thongbao_bcn,quanly.thongbao.bcn,model_quanly_thongbao,group_datn_ban_chu
 access_thongbao_all,quanly.thongbao.all,model_quanly_thongbao,base.group_user,1,0,0,0
 access_tepthongbao_all,quanly.tepthongbao.all,model_quanly_tepthongbao,base.group_user,1,1,1,1
 access_tinnhan_all,quanly.tinnhan.all,model_quanly_tinnhan,base.group_user,1,1,1,0
+

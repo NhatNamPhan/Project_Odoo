@@ -92,3 +92,4 @@ class NganHangDeTai(models.Model):
         ('da_chon', 'Đã có sinh viên nhận'),
         ('tu_choi', 'Không duyệt')
     ], string='Trạng thái', default='cho_duyet')
+

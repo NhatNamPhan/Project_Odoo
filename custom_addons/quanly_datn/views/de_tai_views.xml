@@ -127,3 +127,4 @@
     <menuitem id="menu_detai" name="Đề tài tốt nghiệp" parent="menu_sub_de_tai_root" action="action_detai" sequence="10"/>
     <menuitem id="menu_hinhanhdetai" name="Thư viện ảnh Showcase" parent="menu_sub_de_tai_root" action="action_hinhanhdetai" sequence="20"/>
 </odoo>
+

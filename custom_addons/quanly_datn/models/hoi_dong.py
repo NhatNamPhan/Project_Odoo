@@ -120,3 +120,4 @@ class PhieuChamDiem(models.Model):
                 if phieu_list:
                     rec.de_tai_id.diem_bao_cao_tb = round(sum(p.diem_bao_cao for p in phieu_list) / len(phieu_list), 2)
                     rec.de_tai_id.diem_do_an_tb = round(sum(p.diem_do_an for p in phieu_list) / len(phieu_list), 2)
+

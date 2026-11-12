@@ -167,3 +167,4 @@
     <menuitem id="menu_dangky" name="Danh sách đăng ký" parent="menu_sub_dot_doan_root" action="action_dangky" sequence="20"/>
     <menuitem id="menu_nganhangdetai" name="Ngân hàng đề tài" parent="menu_sub_dot_doan_root" action="action_nganhangdetai" sequence="30"/>
 </odoo>
+

@@ -55,3 +55,4 @@ class GiangVien(models.Model):
         ('ma_gv_uniq', 'unique(ma_gv)', 'Mã giảng viên đã tồn tại!'),
         ('user_id_uniq', 'unique(user_id)', 'Tài khoản người dùng này đã gắn với một giảng viên!')
     ]
+

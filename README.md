@@ -98,3 +98,4 @@ Project_Odoo/
 * `docs:` Cập nhật tài liệu (vd: `docs: cap nhat README`)
 * `style:` Chỉnh sửa giao diện XML/CSS
 * `refactor:` Tối ưu cấu trúc mã nguồn
+

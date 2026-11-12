@@ -33,3 +33,4 @@ class LopSinhHoat(models.Model):
     _sql_constraints = [
         ('ma_lop_uniq', 'unique(ma_lop)', 'Mã lớp sinh hoạt đã tồn tại!')
     ]
+

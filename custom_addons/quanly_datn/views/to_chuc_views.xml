@@ -191,3 +191,4 @@
     <menuitem id="menu_lopsinhhoat" name="Lớp sinh hoạt" parent="menu_sub_to_chuc_root" action="action_lopsinhhoat" sequence="30"/>
     <menuitem id="menu_chuyennganh" name="Chuyên ngành" parent="menu_sub_to_chuc_root" action="action_chuyennganh" sequence="40"/>
 </odoo>
+

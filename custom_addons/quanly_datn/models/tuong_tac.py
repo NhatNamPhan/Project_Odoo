@@ -38,3 +38,4 @@ class TinNhan(models.Model):
     noi_dung = fields.Text(string='Nội dung tin nhắn', required=True)
     da_doc = fields.Boolean(string='Đã đọc', default=False)
     ngay_gui = fields.Datetime(string='Thời gian gửi', default=fields.Datetime.now, readonly=True)
+

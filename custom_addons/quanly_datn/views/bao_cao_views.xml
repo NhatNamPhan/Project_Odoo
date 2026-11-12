@@ -109,3 +109,4 @@
     <menuitem id="menu_baocao" name="Nộp báo cáo tiến độ" parent="menu_sub_de_tai_root" action="action_baocao" sequence="30"/>
     <menuitem id="menu_dotbaocao" name="Cấu hình đợt báo cáo" parent="menu_sub_de_tai_root" action="action_dotbaocao" sequence="40"/>
 </odoo>
+

@@ -46,3 +46,4 @@ class BaoCao(models.Model):
                 rec.nop_tre = rec.ngay_nop.date() > rec.dot_bao_cao_id.han_nop
             else:
                 rec.nop_tre = False
+

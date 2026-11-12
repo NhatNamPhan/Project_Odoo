@@ -98,3 +98,4 @@ class HinhAnhDeTai(models.Model):
     hinh_anh = fields.Image(string='File hình ảnh', max_width=1920, max_height=1080)
     url = fields.Char(string='URL đường dẫn ảnh')
     mo_ta = fields.Text(string='Mô tả ảnh')
+
