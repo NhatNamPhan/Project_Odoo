@@ -27,6 +27,7 @@ Hệ thống Quản lý Đồ án Tốt nghiệp cho sinh viên Khoa Công ngh�
     ],
     'data': [
         'security/security_groups.xml',
+        'security/record_rules.xml',
         'security/ir.model.access.csv',
         'views/menu_views.xml',
         'views/to_chuc_views.xml',

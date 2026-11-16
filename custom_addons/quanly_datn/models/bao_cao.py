@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-from odoo import models, fields, api
+from odoo import models, fields, api, _
+from odoo.exceptions import AccessError, ValidationError
 
 class DotBaoCao(models.Model):
     _name = 'quanly.dotbaocao'
@@ -38,6 +39,37 @@ class BaoCao(models.Model):
         ('can_sua', 'Cần sửa đổi nộp lại'),
         ('khong_dat', 'Không đạt')
     ], string='Trạng thái duyệt', default='dang_cho')
+
+    def _is_bcn(self):
+        return self.env.user.has_group('quanly_datn.group_datn_ban_chu_nhiem')
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        if not self._is_bcn():
+            sinh_vien = self.env['quanly.sinhvien'].search([('user_id', '=', self.env.user.id)], limit=1)
+            if not sinh_vien:
+                raise AccessError(_('Tài khoản này chưa có hồ sơ sinh viên.'))
+            for vals in vals_list:
+                de_tai = self.env['quanly.detai'].browse(vals.get('de_tai_id'))
+                dot_bao_cao = self.env['quanly.dotbaocao'].browse(vals.get('dot_bao_cao_id'))
+                if not de_tai.exists() or de_tai.sinh_vien_id != sinh_vien:
+                    raise AccessError(_('Bạn chỉ được nộp báo cáo cho đề tài của chính mình.'))
+                if not dot_bao_cao.exists() or dot_bao_cao.dot_do_an_id != de_tai.dot_do_an_id:
+                    raise ValidationError(_('Đợt báo cáo phải thuộc cùng đợt đồ án với đề tài.'))
+                vals['trang_thai'] = 'dang_cho'
+        return super().create(vals_list)
+
+    def write(self, vals):
+        if self._is_bcn():
+            return super().write(vals)
+        if not self.env.user.has_group('quanly_datn.group_datn_giang_vien') or any(
+            rec.de_tai_id.giang_vien_huong_dan_id.user_id != self.env.user for rec in self
+        ):
+            raise AccessError(_('Chỉ giảng viên hướng dẫn được phản hồi báo cáo.'))
+        allowed_fields = {'phan_hoi_gvhd', 'trang_thai'}
+        if not set(vals).issubset(allowed_fields):
+            raise AccessError(_('Giảng viên chỉ được cập nhật phản hồi và trạng thái duyệt báo cáo.'))
+        return super().write(vals)
 
     @api.depends('ngay_nop', 'dot_bao_cao_id.han_nop')
     def _compute_nop_tre(self):

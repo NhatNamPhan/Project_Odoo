@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-from odoo import models, fields, api
+from odoo import models, fields, api, _
+from odoo.exceptions import AccessError, UserError
 
 class DeTai(models.Model):
     _name = 'quanly.detai'
@@ -50,6 +51,7 @@ class DeTai(models.Model):
 
     da_khoa_diem = fields.Boolean(string='Đã khóa điểm', default=False)
     trang_thai = fields.Selection([
+        ('cho_xac_nhan_bao_ve', 'Chờ GVHD xác nhận bảo vệ'),
         ('dang_thuc_hien', 'Đang thực hiện'),
         ('cho_bao_ve', 'Đủ điều kiện chờ bảo vệ'),
         ('khong_duoc_bao_ve', 'Không được bảo vệ'),
@@ -65,6 +67,80 @@ class DeTai(models.Model):
         ('ma_de_tai_uniq', 'unique(ma_de_tai)', 'Mã đề tài đã tồn tại!'),
         ('dang_ky_uniq', 'unique(dang_ky_id)', 'Mỗi lượt đăng ký của sinh viên chỉ được gán đúng 1 đề tài!')
     ]
+
+    def _is_bcn(self):
+        return self.env.user.has_group('quanly_datn.group_datn_ban_chu_nhiem')
+
+    def _current_sinh_vien(self):
+        return self.env['quanly.sinhvien'].search([('user_id', '=', self.env.user.id)], limit=1)
+
+    def _is_gvhd(self):
+        return all(rec.giang_vien_huong_dan_id.user_id == self.env.user for rec in self)
+
+    def write(self, vals):
+        if self._is_bcn():
+            return super().write(vals)
+
+        changed_fields = set(vals)
+        if self.env.user.has_group('quanly_datn.group_datn_sinh_vien'):
+            sinh_vien = self._current_sinh_vien()
+            if not sinh_vien or any(rec.sinh_vien_id != sinh_vien for rec in self):
+                raise AccessError(_('Bạn chỉ được cập nhật đề tài của chính mình.'))
+            allowed_fields = {'mo_ta', 'link_github', 'link_demo', 'trang_thai'}
+            if not changed_fields.issubset(allowed_fields):
+                raise AccessError(_('Sinh viên chỉ được cập nhật mô tả và các liên kết của đề tài.'))
+            if 'trang_thai' in vals and any(
+                rec.trang_thai != 'dang_thuc_hien' or vals['trang_thai'] != 'cho_xac_nhan_bao_ve'
+                for rec in self
+            ):
+                raise AccessError(_('Bạn không được chuyển đề tài sang trạng thái này.'))
+            return super().write(vals)
+
+        if self.env.user.has_group('quanly_datn.group_datn_giang_vien'):
+            if not self._is_gvhd():
+                raise AccessError(_('Chỉ giảng viên hướng dẫn của đề tài mới được thực hiện thao tác này.'))
+            allowed_fields = {'diem_gvhd', 'nhan_xet_tong_ket', 'gvhd_da_duyet', 'trang_thai'}
+            if not changed_fields.issubset(allowed_fields):
+                raise AccessError(_('Giảng viên chỉ được cập nhật nhận xét, điểm và xác nhận bảo vệ.'))
+            if 'trang_thai' in vals and any(
+                rec.trang_thai != 'cho_xac_nhan_bao_ve'
+                or vals['trang_thai'] not in ('cho_bao_ve', 'khong_duoc_bao_ve')
+                for rec in self
+            ):
+                raise AccessError(_('Đề tài không ở trạng thái chờ bạn xác nhận bảo vệ.'))
+            return super().write(vals)
+
+        raise AccessError(_('Bạn không có quyền cập nhật đề tài này.'))
+
+    def action_gui_xac_nhan_bao_ve(self):
+        self.ensure_one()
+        sinh_vien = self._current_sinh_vien()
+        if not sinh_vien or self.sinh_vien_id != sinh_vien:
+            raise AccessError(_('Chỉ sinh viên thực hiện đề tài mới được gửi yêu cầu bảo vệ.'))
+        if self.trang_thai != 'dang_thuc_hien':
+            raise UserError(_('Đề tài không ở trạng thái có thể gửi yêu cầu bảo vệ.'))
+
+        dot_bao_cao_ids = self.env['quanly.dotbaocao'].search([
+            ('dot_do_an_id', '=', self.dot_do_an_id.id),
+        ])
+        bao_cao_dat_ids = self.bao_cao_ids.filtered(lambda report: report.trang_thai == 'dat').mapped('dot_bao_cao_id')
+        if dot_bao_cao_ids - bao_cao_dat_ids:
+            raise UserError(_('Bạn cần có báo cáo đạt yêu cầu ở tất cả các đợt báo cáo trước khi gửi yêu cầu bảo vệ.'))
+        self.write({'trang_thai': 'cho_xac_nhan_bao_ve'})
+
+    def action_xac_nhan_bao_ve(self):
+        if not self._is_gvhd():
+            raise AccessError(_('Chỉ giảng viên hướng dẫn của đề tài mới được xác nhận bảo vệ.'))
+        if any(rec.trang_thai != 'cho_xac_nhan_bao_ve' for rec in self):
+            raise UserError(_('Đề tài cần ở trạng thái chờ xác nhận bảo vệ.'))
+        self.write({'gvhd_da_duyet': True, 'trang_thai': 'cho_bao_ve'})
+
+    def action_tu_choi_bao_ve(self):
+        if not self._is_gvhd():
+            raise AccessError(_('Chỉ giảng viên hướng dẫn của đề tài mới được từ chối bảo vệ.'))
+        if any(rec.trang_thai != 'cho_xac_nhan_bao_ve' for rec in self):
+            raise UserError(_('Đề tài cần ở trạng thái chờ xác nhận bảo vệ.'))
+        self.write({'gvhd_da_duyet': False, 'trang_thai': 'khong_duoc_bao_ve'})
 
     @api.depends('diem_gvhd', 'diem_bao_cao_tb', 'diem_do_an_tb', 'dot_do_an_id')
     def _compute_diem_tong_ket(self):

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-from odoo import models, fields
+from odoo import models, fields, api, _
+from odoo.exceptions import AccessError, UserError
 
 class DotDoAn(models.Model):
     _name = 'quanly.dotdoan'
@@ -62,6 +63,41 @@ class DangKy(models.Model):
         ('sinhvien_dot_uniq', 'unique(sinh_vien_id, dot_do_an_id)', 'Sinh viên đã đăng ký tham gia đợt này rồi!')
     ]
 
+    def _is_bcn(self):
+        return self.env.user.has_group('quanly_datn.group_datn_ban_chu_nhiem')
+
+    def _current_sinh_vien(self):
+        return self.env['quanly.sinhvien'].search([('user_id', '=', self.env.user.id)], limit=1)
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        if not self._is_bcn():
+            sinh_vien = self._current_sinh_vien()
+            if not sinh_vien:
+                raise AccessError(_('Tài khoản này chưa có hồ sơ sinh viên.'))
+            for vals in vals_list:
+                if vals.get('sinh_vien_id') != sinh_vien.id:
+                    raise AccessError(_('Bạn chỉ được đăng ký đồ án cho chính mình.'))
+                dot = self.env['quanly.dotdoan'].browse(vals.get('dot_do_an_id'))
+                if not dot.exists() or dot.trang_thai != 'dang_dang_ky':
+                    raise UserError(_('Đợt đồ án này hiện không mở đăng ký.'))
+                vals['trang_thai'] = 'cho_duyet'
+        return super().create(vals_list)
+
+    def action_duyet(self):
+        if not self._is_bcn():
+            raise AccessError(_('Chỉ Ban chủ nhiệm khoa được duyệt đăng ký.'))
+        if any(rec.trang_thai != 'cho_duyet' for rec in self):
+            raise UserError(_('Chỉ có thể duyệt đăng ký đang chờ duyệt.'))
+        self.write({'trang_thai': 'da_duyet'})
+
+    def action_tu_choi(self):
+        if not self._is_bcn():
+            raise AccessError(_('Chỉ Ban chủ nhiệm khoa được từ chối đăng ký.'))
+        if any(rec.trang_thai != 'cho_duyet' for rec in self):
+            raise UserError(_('Chỉ có thể từ chối đăng ký đang chờ duyệt.'))
+        self.write({'trang_thai': 'tu_choi'})
+
     def _compute_display_name(self):
         for rec in self:
             rec.display_name = f"{rec.sinh_vien_id.ho_ten or ''} - {rec.dot_do_an_id.ten_dot or ''}"
@@ -69,6 +105,23 @@ class DangKy(models.Model):
 
 class NganHangDeTai(models.Model):
     _name = 'quanly.nganhangdetai'
+
+    def _is_bcn(self):
+        return self.env.user.has_group('quanly_datn.group_datn_ban_chu_nhiem')
+
+    def action_duyet(self):
+        if not self._is_bcn():
+            raise AccessError(_('Chỉ Ban chủ nhiệm khoa được duyệt đề tài đề xuất.'))
+        if any(rec.trang_thai not in ('du_thao', 'cho_duyet') for rec in self):
+            raise UserError(_('Chỉ có thể duyệt đề tài ở trạng thái dự thảo hoặc chờ duyệt.'))
+        self.write({'trang_thai': 'da_duyet'})
+
+    def action_tu_choi(self):
+        if not self._is_bcn():
+            raise AccessError(_('Chỉ Ban chủ nhiệm khoa được từ chối đề tài đề xuất.'))
+        if any(rec.trang_thai not in ('du_thao', 'cho_duyet') for rec in self):
+            raise UserError(_('Đề tài này không ở trạng thái có thể từ chối.'))
+        self.write({'trang_thai': 'tu_choi'})
     _description = 'Ngân hàng đề tài đề xuất'
     _rec_name = 'ten_de_tai'
 

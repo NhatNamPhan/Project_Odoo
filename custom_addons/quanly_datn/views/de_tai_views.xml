@@ -25,7 +25,13 @@
         <field name="arch" type="xml">
             <form string="Đề tài tốt nghiệp">
                 <header>
-                    <field name="trang_thai" widget="statusbar" statusbar_visible="dang_thuc_hien,cho_bao_ve,da_bao_ve,da_luu_chieu"/>
+                    <button name="action_gui_xac_nhan_bao_ve" type="object" string="Gửi yêu cầu bảo vệ" class="btn-primary"
+                            groups="quanly_datn.group_datn_sinh_vien" invisible="trang_thai != 'dang_thuc_hien'"/>
+                    <button name="action_xac_nhan_bao_ve" type="object" string="Xác nhận đủ điều kiện bảo vệ" class="btn-primary"
+                            groups="quanly_datn.group_datn_giang_vien" invisible="trang_thai != 'cho_xac_nhan_bao_ve'"/>
+                    <button name="action_tu_choi_bao_ve" type="object" string="Không đủ điều kiện" confirm="Bạn có chắc muốn từ chối điều kiện bảo vệ?"
+                            groups="quanly_datn.group_datn_giang_vien" invisible="trang_thai != 'cho_xac_nhan_bao_ve'"/>
+                    <field name="trang_thai" widget="statusbar" statusbar_visible="dang_thuc_hien,cho_xac_nhan_bao_ve,cho_bao_ve,khong_duoc_bao_ve,da_bao_ve,da_luu_chieu"/>
                 </header>
                 <sheet>
                     <div class="oe_title">
