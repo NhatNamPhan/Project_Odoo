@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_thongbao_list" model="ir.ui.view">
+        <field name="name">quanly.thongbao.list</field>
+        <field name="model">quanly.thongbao</field>
+        <field name="arch" type="xml">
+            <list string="Thông báo chính thức">
+                <field name="tieu_de"/>
+                <field name="dot_do_an_id"/>
+                <field name="nguoi_gui_id"/>
+                <field name="ngay_tao"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_thongbao_form" model="ir.ui.view">
+        <field name="name">quanly.thongbao.form</field>
+        <field name="model">quanly.thongbao</field>
+        <field name="arch" type="xml">
+            <form string="Thông báo chính thức">
+                <header>
+                    <button name="action_dong_bo_nguoi_nhan" type="object" string="Đồng bộ người nhận"
+                            class="btn-primary" groups="quanly_datn.group_datn_ban_chu_nhiem"/>
+                    <button name="action_danh_dau_da_doc" type="object" string="Đánh dấu đã đọc"
+                            groups="quanly_datn.group_datn_sinh_vien,quanly_datn.group_datn_giang_vien"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="tieu_de" string="Tiêu đề"/>
+                        <h1><field name="tieu_de" placeholder="Nhập tiêu đề thông báo..."/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="dot_do_an_id"/>
+                            <field name="nguoi_gui_id" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="ngay_tao" readonly="1"/>
+                        </group>
+                    </group>
+                    <group string="Nội dung">
+                        <field name="noi_dung" nolabel="1"/>
+                    </group>
+                    <notebook>
+                        <page string="Tệp đính kèm">
+                            <field name="tep_ids">
+                                <list editable="bottom">
+                                    <field name="ten_tep"/>
+                                    <field name="file_dinh_kem" filename="ten_tep"/>
+                                    <field name="url_tep" widget="url"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Người nhận" groups="quanly_datn.group_datn_ban_chu_nhiem">
+                            <field name="nguoi_nhan_ids" readonly="1">
+                                <list>
+                                    <field name="nguoi_nhan_id"/>
+                                    <field name="da_doc"/>
+                                    <field name="ngay_doc"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_thongbao_quanly" model="ir.actions.act_window">
+        <field name="name">Quản lý thông báo</field>
+        <field name="res_model">quanly.thongbao</field>
+        <field name="view_mode">list,form</field>
+        <field name="groups_id" eval="[(4, ref('group_datn_ban_chu_nhiem'))]"/>
+    </record>
+
+    <record id="action_thongbao_cua_toi" model="ir.actions.act_window">
+        <field name="name">Thông báo của tôi</field>
+        <field name="res_model">quanly.thongbao</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('nguoi_nhan_ids.nguoi_nhan_id', '=', uid)]</field>
+    </record>
+
+    <menuitem id="menu_thongbao_cua_toi" name="Thông báo của tôi"
+              parent="menu_sub_tuong_tac_root" action="action_thongbao_cua_toi" sequence="10"
+              groups="quanly_datn.group_datn_sinh_vien,quanly_datn.group_datn_giang_vien,quanly_datn.group_datn_ban_chu_nhiem"/>
+    <menuitem id="menu_thongbao_quanly" name="Quản lý thông báo"
+              parent="menu_sub_tuong_tac_root" action="action_thongbao_quanly" sequence="20"
+              groups="quanly_datn.group_datn_ban_chu_nhiem"/>
+</odoo>

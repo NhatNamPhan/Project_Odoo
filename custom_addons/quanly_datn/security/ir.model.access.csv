@@ -47,6 +47,9 @@ access_thongbao_gv,quanly.thongbao.gv,model_quanly_thongbao,group_datn_giang_vie
 access_tepthongbao_bcn,quanly.tepthongbao.bcn,model_quanly_tepthongbao,group_datn_ban_chu_nhiem,1,1,1,1
 access_tepthongbao_sv,quanly.tepthongbao.sv,model_quanly_tepthongbao,group_datn_sinh_vien,1,0,0,0
 access_tepthongbao_gv,quanly.tepthongbao.gv,model_quanly_tepthongbao,group_datn_giang_vien,1,0,0,0
+access_nguoinhanthongbao_bcn,quanly.nguoinhanthongbao.bcn,model_quanly_nguoinhanthongbao,group_datn_ban_chu_nhiem,1,1,1,1
+access_nguoinhanthongbao_sv,quanly.nguoinhanthongbao.sv,model_quanly_nguoinhanthongbao,group_datn_sinh_vien,1,1,0,0
+access_nguoinhanthongbao_gv,quanly.nguoinhanthongbao.gv,model_quanly_nguoinhanthongbao,group_datn_giang_vien,1,1,0,0
 access_tinnhan_bcn,quanly.tinnhan.bcn,model_quanly_tinnhan,group_datn_ban_chu_nhiem,1,1,1,1
 access_tinnhan_sv,quanly.tinnhan.sv,model_quanly_tinnhan,group_datn_sinh_vien,1,1,1,0
 access_tinnhan_gv,quanly.tinnhan.gv,model_quanly_tinnhan,group_datn_giang_vien,1,1,1,0

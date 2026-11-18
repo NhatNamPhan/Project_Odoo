@@ -29,5 +29,11 @@
               name="Tổ Chức &amp; Người Dùng"
               parent="menu_quanly_datn_root"
               sequence="40"/>
+
+    <!-- Category 5: Thông báo chính thức -->
+    <menuitem id="menu_sub_tuong_tac_root"
+              name="Thông Báo"
+              parent="menu_quanly_datn_root"
+              sequence="50"/>
 </odoo>
 

@@ -35,6 +35,7 @@ Hệ thống Quản lý Đồ án Tốt nghiệp cho sinh viên Khoa Công ngh�
         'views/de_tai_views.xml',
         'views/bao_cao_views.xml',
         'views/hoi_dong_views.xml',
+        'views/tuong_tac_views.xml',
     ],
     'installable': True,
     'application': True,
