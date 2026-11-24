@@ -30,10 +30,25 @@
                     </group>
                     <notebook>
                         <page string="Danh sách Lớp sinh hoạt">
-                            <field name="lop_ids"/>
+                            <field name="lop_ids" readonly="1">
+                                <list>
+                                    <field name="ma_lop"/>
+                                    <field name="ten_lop"/>
+                                    <field name="nien_khoa"/>
+                                </list>
+                            </field>
                         </page>
                         <page string="Danh sách Giảng viên">
-                            <field name="giang_vien_ids"/>
+                            <field name="giang_vien_ids">
+                                <list editable="bottom">
+                                    <field name="ma_gv"/>
+                                    <field name="ho_ten"/>
+                                    <field name="hoc_ham_hoc_vi"/>
+                                    <field name="email"/>
+                                    <field name="sdt"/>
+                                    <field name="han_muc_huong_dan"/>
+                                </list>
+                            </field>
                         </page>
                     </notebook>
                 </sheet>
