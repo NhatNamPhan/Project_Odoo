@@ -7,10 +7,10 @@ class SinhVien(models.Model):
     _description = 'Thông tin sinh viên'
     _rec_name = 'ho_ten'
 
-    user_id = fields.Many2one('res.users', string='Tài khoản người dùng', required=False, ondelete='cascade')
+    user_id = fields.Many2one('res.users', string='Tài khoản liên kết', required=False, ondelete='set null')
     ma_sv = fields.Char(string='Mã số sinh viên', required=True, copy=False)
-    ho_ten = fields.Char(string='Họ và tên', related='user_id.name', store=True, readonly=False)
-    email = fields.Char(string='Email', related='user_id.login', store=True, readonly=False)
+    ho_ten = fields.Char(string='Họ và tên', required=True)
+    email = fields.Char(string='Email', required=True)
     sdt = fields.Char(string='Số điện thoại')
     lop_sinh_hoat_id = fields.Many2one('quanly.lopsinhhoat', string='Lớp sinh hoạt', required=True)
     chuyen_nganh_id = fields.Many2one(
@@ -37,31 +37,58 @@ class SinhVien(models.Model):
             duplicate = self.search([('ma_sv', '=', rec.ma_sv), ('id', '!=', rec.id)], limit=1)
             if duplicate:
                 raise ValidationError(
-                    _(f"Mã số sinh viên '{rec.ma_sv}' đã được cấp cho sinh viên '{duplicate.ho_ten or duplicate.user_id.name}'. "
+                    _(f"Mã số sinh viên '{rec.ma_sv}' đã được cấp cho sinh viên '{duplicate.ho_ten}'. "
                       f"Vui lòng kiểm tra lại MSSV.")
                 )
 
     @api.model_create_multi
     def create(self, vals_list):
+        group_sv = self.env.ref('quanly_datn.group_datn_sinh_vien', raise_if_not_found=False)
+        group_internal = self.env.ref('base.group_user')
+        groups = [group_internal.id]
+        if group_sv:
+            groups.append(group_sv.id)
+
         for vals in vals_list:
-            if not vals.get('user_id'):
-                email = vals.get('email') or f"sv_{vals.get('ma_sv', '').lower()}@sv.ute.udn.vn"
-                name = vals.get('ho_ten') or vals.get('ma_sv')
-                group_sv = self.env.ref('quanly_datn.group_datn_sinh_vien', raise_if_not_found=False)
-                group_internal = self.env.ref('base.group_user')
-                groups = [group_internal.id]
-                if group_sv:
-                    groups.append(group_sv.id)
+            email = vals.get('email')
+            name = vals.get('ho_ten') or vals.get('ma_sv')
+            if not email and vals.get('ma_sv'):
+                email = f"sv_{vals.get('ma_sv').lower()}@sv.ute.udn.vn"
+                vals['email'] = email
+
+            if not vals.get('user_id') and email:
                 user = self.env['res.users'].sudo().search([('login', '=', email)], limit=1)
                 if not user:
                     user = self.env['res.users'].sudo().create({
                         'name': name,
                         'login': email,
+                        'email': email,
                         'password': '123456',
                         'groups_id': [(6, 0, groups)],
                     })
+                else:
+                    existing_sv = self.search([('user_id', '=', user.id)], limit=1)
+                    if existing_sv:
+                        raise ValidationError(
+                            _(f"Email '{email}' đã được liên kết với sinh viên '{existing_sv.ho_ten}' (MSSV: {existing_sv.ma_sv}). "
+                              f"Vui lòng sử dụng email khác.")
+                        )
                 vals['user_id'] = user.id
         return super().create(vals_list)
+
+    def write(self, vals):
+        res = super().write(vals)
+        for rec in self:
+            if rec.user_id:
+                user_vals = {}
+                if 'ho_ten' in vals:
+                    user_vals['name'] = vals['ho_ten']
+                if 'email' in vals:
+                    user_vals['login'] = vals['email']
+                    user_vals['email'] = vals['email']
+                if user_vals:
+                    rec.user_id.sudo().write(user_vals)
+        return res
 
 
 class GiangVien(models.Model):
@@ -69,10 +96,10 @@ class GiangVien(models.Model):
     _description = 'Thông tin giảng viên'
     _rec_name = 'ho_ten'
 
-    user_id = fields.Many2one('res.users', string='Tài khoản người dùng', required=False, ondelete='cascade')
+    user_id = fields.Many2one('res.users', string='Tài khoản liên kết', required=False, ondelete='set null')
     ma_gv = fields.Char(string='Mã giảng viên', required=True, copy=False)
-    ho_ten = fields.Char(string='Họ và tên', related='user_id.name', store=True, readonly=False)
-    email = fields.Char(string='Email', related='user_id.login', store=True, readonly=False)
+    ho_ten = fields.Char(string='Họ và tên', required=True)
+    email = fields.Char(string='Email', required=True)
     sdt = fields.Char(string='Số điện thoại')
     chuyen_nganh_id = fields.Many2one('quanly.chuyennganh', string='Chuyên ngành / Bộ môn', required=True)
     hoc_ham_hoc_vi = fields.Selection([
@@ -95,29 +122,55 @@ class GiangVien(models.Model):
             duplicate = self.search([('ma_gv', '=', rec.ma_gv), ('id', '!=', rec.id)], limit=1)
             if duplicate:
                 raise ValidationError(
-                    _(f"Mã giảng viên '{rec.ma_gv}' đã được cấp cho giảng viên '{duplicate.ho_ten or duplicate.user_id.name}'. "
+                    _(f"Mã giảng viên '{rec.ma_gv}' đã được cấp cho giảng viên '{duplicate.ho_ten}'. "
                       f"Vui lòng nhập mã mới (ví dụ: GV06, GV07...) hoặc vào menu 'Hồ sơ Giảng viên' để chuyển chuyên ngành.")
                 )
 
     @api.model_create_multi
     def create(self, vals_list):
+        group_gv = self.env.ref('quanly_datn.group_datn_giang_vien', raise_if_not_found=False)
+        group_internal = self.env.ref('base.group_user')
+        groups = [group_internal.id]
+        if group_gv:
+            groups.append(group_gv.id)
+
         for vals in vals_list:
-            if not vals.get('user_id'):
-                email = vals.get('email') or f"gv_{vals.get('ma_gv', '').lower()}@ute.udn.vn"
-                name = vals.get('ho_ten') or vals.get('ma_gv')
-                group_gv = self.env.ref('quanly_datn.group_datn_giang_vien', raise_if_not_found=False)
-                group_internal = self.env.ref('base.group_user')
-                groups = [group_internal.id]
-                if group_gv:
-                    groups.append(group_gv.id)
+            email = vals.get('email')
+            name = vals.get('ho_ten') or vals.get('ma_gv')
+            if not email and vals.get('ma_gv'):
+                email = f"gv_{vals.get('ma_gv').lower()}@ute.udn.vn"
+                vals['email'] = email
+
+            if not vals.get('user_id') and email:
                 user = self.env['res.users'].sudo().search([('login', '=', email)], limit=1)
                 if not user:
                     user = self.env['res.users'].sudo().create({
                         'name': name,
                         'login': email,
+                        'email': email,
                         'password': '123456',
                         'groups_id': [(6, 0, groups)],
                     })
+                else:
+                    existing_gv = self.search([('user_id', '=', user.id)], limit=1)
+                    if existing_gv:
+                        raise ValidationError(
+                            _(f"Email '{email}' đã được liên kết với giảng viên '{existing_gv.ho_ten}' (Mã GV: {existing_gv.ma_gv}). "
+                              f"Vui lòng sử dụng email khác.")
+                        )
                 vals['user_id'] = user.id
         return super().create(vals_list)
 
+    def write(self, vals):
+        res = super().write(vals)
+        for rec in self:
+            if rec.user_id:
+                user_vals = {}
+                if 'ho_ten' in vals:
+                    user_vals['name'] = vals['ho_ten']
+                if 'email' in vals:
+                    user_vals['login'] = vals['email']
+                    user_vals['email'] = vals['email']
+                if user_vals:
+                    rec.user_id.sudo().write(user_vals)
+        return res

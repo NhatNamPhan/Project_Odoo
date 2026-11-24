@@ -90,7 +90,15 @@
                     </group>
                     <notebook>
                         <page string="Sinh viên của lớp">
-                            <field name="sinh_vien_ids"/>
+                            <field name="sinh_vien_ids">
+                                <list editable="bottom">
+                                    <field name="ma_sv"/>
+                                    <field name="ho_ten"/>
+                                    <field name="email"/>
+                                    <field name="sdt"/>
+                                    <field name="trang_thai"/>
+                                </list>
+                            </field>
                         </page>
                     </notebook>
                 </sheet>
@@ -127,19 +135,26 @@
         <field name="arch" type="xml">
             <form string="Thông tin sinh viên">
                 <sheet>
+                    <div class="oe_title">
+                        <label for="ho_ten" string="Họ và tên sinh viên"/>
+                        <h1>
+                            <field name="ho_ten" placeholder="Ví dụ: Nguyễn Văn A" required="1"/>
+                        </h1>
+                    </div>
                     <group>
-                        <group>
-                            <field name="user_id"/>
-                            <field name="ma_sv"/>
-                            <field name="ho_ten"/>
-                        </group>
-                        <group>
-                            <field name="email"/>
-                            <field name="sdt"/>
-                            <field name="lop_sinh_hoat_id"/>
+                        <group string="Thông tin học tập">
+                            <field name="ma_sv" placeholder="Ví dụ: 22115053122399"/>
+                            <field name="lop_sinh_hoat_id" options="{'no_create': True, 'no_open': False}"/>
                             <field name="chuyen_nganh_id"/>
                             <field name="trang_thai"/>
                         </group>
+                        <group string="Thông tin liên lạc">
+                            <field name="email" placeholder="Ví dụ: nguyenvana@sv.ute.udn.vn" required="1"/>
+                            <field name="sdt" placeholder="Ví dụ: 0901234567"/>
+                        </group>
+                    </group>
+                    <group string="Tài khoản hệ thống" groups="base.group_no_one">
+                        <field name="user_id" readonly="1"/>
                     </group>
                 </sheet>
             </form>
@@ -175,19 +190,26 @@
         <field name="arch" type="xml">
             <form string="Thông tin giảng viên">
                 <sheet>
+                    <div class="oe_title">
+                        <label for="ho_ten" string="Họ và tên giảng viên"/>
+                        <h1>
+                            <field name="ho_ten" placeholder="Ví dụ: TS. Trần Văn B" required="1"/>
+                        </h1>
+                    </div>
                     <group>
-                        <group>
-                            <field name="user_id"/>
-                            <field name="ma_gv"/>
-                            <field name="ho_ten"/>
+                        <group string="Thông tin công tác">
+                            <field name="ma_gv" placeholder="Ví dụ: GV06"/>
                             <field name="hoc_ham_hoc_vi"/>
-                        </group>
-                        <group>
-                            <field name="chuyen_nganh_id"/>
-                            <field name="email"/>
-                            <field name="sdt"/>
+                            <field name="chuyen_nganh_id" options="{'no_create': True, 'no_open': False}"/>
                             <field name="han_muc_huong_dan"/>
                         </group>
+                        <group string="Thông tin liên lạc">
+                            <field name="email" placeholder="Ví dụ: tranvanb@ute.udn.vn" required="1"/>
+                            <field name="sdt" placeholder="Ví dụ: 0909876543"/>
+                        </group>
+                    </group>
+                    <group string="Tài khoản hệ thống" groups="base.group_no_one">
+                        <field name="user_id" readonly="1"/>
                     </group>
                 </sheet>
             </form>
@@ -206,4 +228,3 @@
     <menuitem id="menu_lopsinhhoat" name="Lớp sinh hoạt" parent="menu_sub_to_chuc_root" action="action_lopsinhhoat" sequence="30"/>
     <menuitem id="menu_chuyennganh" name="Chuyên ngành" parent="menu_sub_to_chuc_root" action="action_chuyennganh" sequence="40"/>
 </odoo>
-
