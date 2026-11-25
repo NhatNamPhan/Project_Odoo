@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from odoo import models, fields, api, _
-from odoo.exceptions import AccessError, UserError
+from odoo.exceptions import AccessError, UserError, ValidationError
 
 class DotDoAn(models.Model):
     _name = 'quanly.dotdoan'
@@ -42,6 +42,78 @@ class DotDoAn(models.Model):
         ('ma_dot_uniq', 'unique(ma_dot)', 'Mã đợt làm đồ án đã tồn tại!')
     ]
 
+    @api.constrains('trong_so_gvhd', 'trong_so_bao_cao', 'trong_so_do_an')
+    def _check_trong_so(self):
+        for rec in self:
+            weights = (rec.trong_so_gvhd, rec.trong_so_bao_cao, rec.trong_so_do_an)
+            if any(weight < 0 or weight > 100 for weight in weights) or abs(sum(weights) - 100) > 0.00001:
+                raise ValidationError(_('Các trọng số phải nằm trong khoảng 0–100% và có tổng bằng 100%.'))
+
+    @api.constrains('ngay_bat_dau_bao_ve', 'ngay_ket_thuc_bao_ve')
+    def _check_lich_bao_ve(self):
+        for rec in self:
+            if rec.ngay_bat_dau_bao_ve and rec.ngay_ket_thuc_bao_ve and rec.ngay_ket_thuc_bao_ve < rec.ngay_bat_dau_bao_ve:
+                raise ValidationError(_('Ngày kết thúc bảo vệ phải sau ngày bắt đầu bảo vệ.'))
+
+    def action_mo_dang_ky(self):
+        if not self.env.user.has_group('quanly_datn.group_datn_ban_chu_nhiem'):
+            raise AccessError(_('Chỉ Ban chủ nhiệm khoa được mở đăng ký đề tài.'))
+        if any(rec.trang_thai != 'chuan_bi' for rec in self):
+            raise UserError(_('Chỉ có thể mở đăng ký khi đợt đang ở trạng thái chuẩn bị.'))
+        self.write({'trang_thai': 'dang_dang_ky'})
+
+    def write(self, vals):
+        if any(rec.trang_thai == 'ket_thuc' for rec in self):
+            raise UserError(_('Đợt đã kết thúc, không thể chỉnh sửa dữ liệu.'))
+        transitions = {'chuan_bi': 'dang_dang_ky', 'dang_dang_ky': 'dang_thuc_hien', 'dang_thuc_hien': 'dang_bao_ve', 'dang_bao_ve': 'ket_thuc'}
+        if 'trang_thai' in vals:
+            for rec in self:
+                if vals['trang_thai'] == rec.trang_thai:
+                    continue
+                if transitions.get(rec.trang_thai) != vals['trang_thai']:
+                    raise UserError(_('Không được bỏ qua hoặc quay ngược giai đoạn đồ án.'))
+                if vals['trang_thai'] == 'ket_thuc':
+                    if rec.hoi_dong_ids.filtered(lambda hd: hd.trang_thai != 'hoan_thanh'):
+                        raise UserError(_('Cần hoàn thành các hội đồng trước khi kết thúc đợt.'))
+                    if self.env['quanly.detai'].search_count([('dot_do_an_id', '=', rec.id), ('trang_thai', 'not in', ['da_luu_chieu', 'khong_duoc_bao_ve'])]):
+                        raise UserError(_('Cần xử lý xong đề tài và xác nhận lưu chiểu trước khi kết thúc đợt.'))
+                    topics = self.env['quanly.detai'].search([('dot_do_an_id', '=', rec.id)])
+                    if rec.dang_ky_ids.filtered(lambda dk: dk.trang_thai == 'cho_duyet') or (
+                        rec.dang_ky_ids.filtered(lambda dk: dk.trang_thai == 'da_duyet') - topics.mapped('dang_ky_id')
+                    ):
+                        raise UserError(_('Còn đăng ký chưa xử lý hoặc sinh viên đã duyệt nhưng chưa giao đề tài.'))
+        if set(vals) & {'trong_so_gvhd', 'trong_so_bao_cao', 'trong_so_do_an'}:
+            if self.env['quanly.detai'].search_count([('dot_do_an_id', 'in', self.ids), ('da_khoa_diem', '=', True)]):
+                raise UserError(_('Không thể đổi trọng số khi đợt đã có đề tài khóa điểm.'))
+        return super().write(vals)
+
+    def _check_open(self):
+        if any(rec.trang_thai == 'ket_thuc' for rec in self):
+            raise UserError(_('Đợt đồ án đã kết thúc, không thể thay đổi dữ liệu nghiệp vụ.'))
+
+    def unlink(self):
+        if any(rec.trang_thai != 'chuan_bi' or rec.dang_ky_ids or rec.hoi_dong_ids or rec.dot_bao_cao_ids or rec.ngan_hang_de_tai_ids for rec in self):
+            raise UserError(_('Không thể xóa đợt đã mở hoặc đã có dữ liệu liên quan.'))
+        return super().unlink()
+
+    def _chuyen_giai_doan(self, source, target):
+        if not self.env.user.has_group('quanly_datn.group_datn_ban_chu_nhiem'):
+            raise AccessError(_('Chỉ Ban chủ nhiệm khoa được chuyển giai đoạn.'))
+        if any(rec.trang_thai != source for rec in self):
+            raise UserError(_('Giai đoạn hiện tại không phù hợp với thao tác này.'))
+        self.write({'trang_thai': target})
+
+    def action_bat_dau_thuc_hien(self):
+        self._chuyen_giai_doan('dang_dang_ky', 'dang_thuc_hien')
+
+    def action_bat_dau_bao_ve(self):
+        self._chuyen_giai_doan('dang_thuc_hien', 'dang_bao_ve')
+
+    def action_ket_thuc(self):
+        if any(rec.hoi_dong_ids.filtered(lambda hd: hd.trang_thai != 'hoan_thanh') for rec in self):
+            raise UserError(_('Cần hoàn thành các hội đồng trước khi kết thúc đợt.'))
+        self._chuyen_giai_doan('dang_bao_ve', 'ket_thuc')
+
 
 class DangKy(models.Model):
     _name = 'quanly.dangky'
@@ -69,8 +141,27 @@ class DangKy(models.Model):
     def _current_sinh_vien(self):
         return self.env['quanly.sinhvien'].search([('user_id', '=', self.env.user.id)], limit=1)
 
+    def write(self, vals):
+        self.mapped('dot_do_an_id')._check_open()
+        if vals.get('dot_do_an_id'):
+            self.env['quanly.dotdoan'].browse(vals['dot_do_an_id'])._check_open()
+        if 'trang_thai' in vals and any(
+            vals['trang_thai'] != rec.trang_thai and (rec.trang_thai != 'cho_duyet' or vals['trang_thai'] not in ('da_duyet', 'tu_choi'))
+            for rec in self
+        ):
+            raise UserError(_('Chỉ được duyệt hoặc từ chối đăng ký đang chờ duyệt.'))
+        if set(vals) & {'sinh_vien_id', 'dot_do_an_id'} and any(rec.trang_thai != 'cho_duyet' for rec in self):
+            raise UserError(_('Không thể đổi người hoặc đợt của đăng ký đã xử lý.'))
+        if set(vals) & {'sinh_vien_id', 'dot_do_an_id', 'trang_thai'}:
+            topics = self.env['quanly.detai'].search([('dang_ky_id', 'in', self.ids)])
+            if topics and (set(vals) & {'sinh_vien_id', 'dot_do_an_id'} or vals.get('trang_thai', 'da_duyet') != 'da_duyet'):
+                raise UserError(_('Đăng ký đã giao đề tài, không thể đổi sinh viên, đợt hoặc hủy duyệt.'))
+        return super().write(vals)
+
     @api.model_create_multi
     def create(self, vals_list):
+        for vals in vals_list:
+            self.env['quanly.dotdoan'].browse(vals.get('dot_do_an_id'))._check_open()
         if not self._is_bcn():
             sinh_vien = self._current_sinh_vien()
             if not sinh_vien:
@@ -78,11 +169,24 @@ class DangKy(models.Model):
             for vals in vals_list:
                 if vals.get('sinh_vien_id') != sinh_vien.id:
                     raise AccessError(_('Bạn chỉ được đăng ký đồ án cho chính mình.'))
+                if sinh_vien.trang_thai != 'dang_hoc':
+                    raise UserError(_('Chỉ sinh viên đang học được đăng ký đồ án.'))
                 dot = self.env['quanly.dotdoan'].browse(vals.get('dot_do_an_id'))
                 if not dot.exists() or dot.trang_thai != 'dang_dang_ky':
                     raise UserError(_('Đợt đồ án này hiện không mở đăng ký.'))
                 vals['trang_thai'] = 'cho_duyet'
         return super().create(vals_list)
+
+    def unlink(self):
+        self.mapped('dot_do_an_id')._check_open()
+        if any(rec.trang_thai != 'cho_duyet' for rec in self):
+            raise UserError(_('Không thể xóa đăng ký đã được xử lý.'))
+        return super().unlink()
+
+    @api.depends('sinh_vien_id.ho_ten', 'dot_do_an_id.ten_dot')
+    def _compute_display_name(self):
+        for rec in self:
+            rec.display_name = f"{rec.sinh_vien_id.ho_ten or ''} - {rec.dot_do_an_id.ten_dot or ''}"
 
     def action_duyet(self):
         if not self._is_bcn():
@@ -98,13 +202,30 @@ class DangKy(models.Model):
             raise UserError(_('Chỉ có thể từ chối đăng ký đang chờ duyệt.'))
         self.write({'trang_thai': 'tu_choi'})
 
-    def _compute_display_name(self):
-        for rec in self:
-            rec.display_name = f"{rec.sinh_vien_id.ho_ten or ''} - {rec.dot_do_an_id.ten_dot or ''}"
-
-
 class NganHangDeTai(models.Model):
     _name = 'quanly.nganhangdetai'
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            self.env['quanly.dotdoan'].browse(vals.get('dot_do_an_id'))._check_open()
+        return super().create(vals_list)
+
+    def write(self, vals):
+        self.mapped('dot_do_an_id')._check_open()
+        if vals.get('dot_do_an_id'):
+            self.env['quanly.dotdoan'].browse(vals['dot_do_an_id'])._check_open()
+        if set(vals) & {'dot_do_an_id', 'trang_thai'}:
+            topics = self.env['quanly.detai'].search([('ngan_hang_de_tai_id', 'in', self.ids)])
+            if topics and ('dot_do_an_id' in vals or vals.get('trang_thai') not in ('da_duyet', 'da_chon')):
+                raise UserError(_('Đề xuất đã giao đề tài, không được đổi đợt hoặc hủy duyệt.'))
+        return super().write(vals)
+
+    def unlink(self):
+        self.mapped('dot_do_an_id')._check_open()
+        if self.env['quanly.detai'].search_count([('ngan_hang_de_tai_id', 'in', self.ids)]):
+            raise UserError(_('Không thể xóa nguồn đề xuất đã được giao đề tài.'))
+        return super().unlink()
 
     def _is_bcn(self):
         return self.env.user.has_group('quanly_datn.group_datn_ban_chu_nhiem')

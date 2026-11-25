@@ -38,6 +38,7 @@ odoo.log
 # Docker & PostgreSQL data
 pgdata/
 odoo-data/
+backups/
 
 # IDE & OS
 .vscode/

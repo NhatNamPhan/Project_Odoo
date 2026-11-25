@@ -84,6 +84,8 @@ for email, name, ma, sdt, cn_id, hoc_vi, han_muc in gvs:
     vals = {
         'user_id': u.id,
         'ma_gv': ma,
+        'ho_ten': name,
+        'email': email,
         'sdt': sdt,
         'chuyen_nganh_id': cn_id,
         'hoc_ham_hoc_vi': hoc_vi,
@@ -112,6 +114,8 @@ for email, name, mssv, sdt, ma_lop in svs:
     vals = {
         'user_id': u.id,
         'ma_sv': mssv,
+        'ho_ten': name,
+        'email': email,
         'sdt': sdt,
         'lop_sinh_hoat_id': lop_map[ma_lop].id,
         'trang_thai': 'dang_hoc',
@@ -215,7 +219,7 @@ for ten, dot_id, cn_id, loai, gv_id, sv_id, mo_ta, tt in de_xuat_list:
     if rec:
         rec.write(vals)
     else:
-        NganHang.create(vals)
+        rec = NganHang.create(vals)
 print(f"- Đã chuẩn hóa {len(de_xuat_list)} đề tài đề xuất.")
 
 # 9. Cập nhật Đợt báo cáo tiến độ
@@ -346,7 +350,7 @@ hd_vals = {
     'ten_hoi_dong': 'Hội đồng bảo vệ ĐATN Ngành Kỹ thuật phần mềm - Hội đồng 1',
     'thoi_gian_bao_ve': datetime(2026, 6, 22, 8, 0, 0),
     'dia_diem': 'Phòng Hội đồng B102 - Tòa nhà Trung tâm UTE',
-    'trang_thai': 'da_chot_lich',
+    'trang_thai': 'du_thao',
 }
 if hd1:
     hd1.write(hd_vals)
@@ -377,6 +381,7 @@ for hd_id, gv_id, vt in thanh_vien_list:
 
 dt_map['DT2026_01'].write({'hoi_dong_id': hd1.id})
 dt_map['DT2026_03'].write({'hoi_dong_id': hd1.id})
+hd1.action_chot_lich()
 print(f"- Đã chuẩn hóa Hội đồng bảo vệ: {hd1.ten_hoi_dong}")
 
 # 13. Cập nhật Phiếu chấm điểm

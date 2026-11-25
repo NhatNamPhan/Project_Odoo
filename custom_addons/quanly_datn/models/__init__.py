@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from . import ui_permissions
 from . import to_chuc
 from . import nguoi_dung
 from . import dot_do_an

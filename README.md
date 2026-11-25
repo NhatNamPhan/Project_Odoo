@@ -91,7 +91,30 @@ Project_Odoo/
 
 ---
 
-## 4. QUY CHUẨN COMMIT GIT
+## 4. KIỂM TRA NGHIỆP VỤ
+
+Các nút điều hành đợt: **Mở đăng ký → Đóng đăng ký / Bắt đầu thực hiện → Bắt đầu bảo vệ → Kết thúc đợt** (BCN).
+GVHD duyệt báo cáo bằng **Đạt yêu cầu / Yêu cầu sửa và nộp lại / Không đạt**; sinh viên tạo bài nộp mới khi cần sửa.
+Sau khi GVHD xác nhận bảo vệ, BCN lập hội đồng và thực hiện **Chốt lịch → Bắt đầu chấm / Tạo phiếu → Hoàn thành và khóa điểm**.
+Trước khi bắt đầu chấm, BCN chuyển đợt sang **Giai đoạn bảo vệ**. GVHD lưu điểm hướng dẫn; với điểm 0, dùng **Xác nhận điểm GVHD** để phân biệt với điểm mặc định chưa nhập.
+Mỗi thành viên mở phiếu của mình và bấm **Xác nhận điểm**. Chỉ hoàn thành khi đủ phiếu đã chấm của mọi thành viên cho từng đề tài.
+Nếu bị từ chối bảo vệ, GVHD dùng **Cho phép bổ sung báo cáo** để sinh viên tiếp tục làm bài.
+Sau bảo vệ, sinh viên cập nhật link mã nguồn và nộp ảnh tại **Thư viện ảnh Showcase**; BCN bấm **Xác nhận lưu chiểu** trên đề tài.
+Chỉ kết thúc đợt khi đã xử lý đăng ký, hoàn thành hội đồng và xử lý xong đề tài/lưu chiểu. Dữ liệu nghiệp vụ của đợt kết thúc và sản phẩm đã lưu chiểu không được ghi đè.
+
+Các trường điểm, phân công và hồ sơ hiển thị quyền sửa theo vai trò. Không đổi thành viên khi đã có phiếu chấm, không đổi trọng số của đợt đã có điểm khóa.
+
+Sau khi cài module vào một database thử nghiệm riêng, chạy dữ liệu mẫu rồi kiểm tra các luồng đăng ký, bảo vệ, chấm điểm và phân quyền:
+
+```bash
+docker compose exec -T web bash -c "odoo shell -d TEN_DATABASE_THU < /mnt/extra-addons/quanly_datn/data/generate_sample_data.py"
+docker compose exec -T web bash -c "odoo shell -d TEN_DATABASE_THU < /mnt/extra-addons/quanly_datn/data/check_workflow.py"
+docker compose exec -T web bash -c "odoo shell -d TEN_DATABASE_THU < /mnt/extra-addons/quanly_datn/data/check_full_cycle.py"
+```
+
+Script kiểm tra không gọi `commit`, nên các thay đổi trong lúc kiểm tra được rollback khi thoát Odoo shell. Dữ liệu mẫu dùng mật khẩu đơn giản chỉ dành cho database thử nghiệm. Tài khoản tạo từ giao diện có mật khẩu ngẫu nhiên; quản trị viên cần đặt lại mật khẩu trước khi bàn giao tài khoản.
+
+## 5. QUY CHUẨN COMMIT GIT
 
 * `feat:` Tính năng mới (vd: `feat: them model BAOCAO va logic tinh nopTre`)
 * `fix:` Sửa lỗi (vd: `fix: sua loi tinh diem trung binh tren phieu cham diem`)

@@ -56,7 +56,10 @@ class ThongBao(models.Model):
     def write(self, vals):
         if 'dot_do_an_id' in vals and any(record.nguoi_nhan_ids for record in self):
             raise UserError(_('Không thể đổi đợt đồ án sau khi thông báo đã có người nhận.'))
-        return super().write(vals)
+        result = super().write(vals)
+        if 'dot_do_an_id' in vals:
+            self._tao_nguoi_nhan_tu_dot_do_an()
+        return result
 
     def action_dong_bo_nguoi_nhan(self):
         if not self._is_bcn():
@@ -105,6 +108,10 @@ class NguoiNhanThongBao(models.Model):
     da_doc = fields.Boolean(string='Đã đọc', default=False)
     ngay_doc = fields.Datetime(string='Thời gian đọc', readonly=True)
 
+    _sql_constraints = [
+        ('thong_bao_nguoi_nhan_uniq', 'unique(thong_bao_id, nguoi_nhan_id)', 'Người dùng đã có trong danh sách nhận thông báo.'),
+    ]
+
     def _is_bcn(self):
         return self.env.user.has_group('quanly_datn.group_datn_ban_chu_nhiem')
 
@@ -112,8 +119,9 @@ class NguoiNhanThongBao(models.Model):
         if not self._is_bcn():
             if any(record.nguoi_nhan_id != self.env.user for record in self):
                 raise AccessError(_('Bạn chỉ được cập nhật trạng thái đọc của chính mình.'))
-            if not set(vals).issubset({'da_doc', 'ngay_doc'}):
+            if vals != {'da_doc': True}:
                 raise AccessError(_('Bạn chỉ được cập nhật trạng thái đã đọc.'))
+            vals = dict(vals, ngay_doc=fields.Datetime.now())
         return super().write(vals)
 
     def action_danh_dau_da_doc(self):
@@ -121,10 +129,7 @@ class NguoiNhanThongBao(models.Model):
             lambda record: record.nguoi_nhan_id == self.env.user and not record.da_doc
         )
         if unread_records:
-            unread_records.write({
-                'da_doc': True,
-                'ngay_doc': fields.Datetime.now(),
-            })
+            unread_records.write({'da_doc': True})
 
 
 class TinNhan(models.Model):
@@ -138,4 +143,34 @@ class TinNhan(models.Model):
     noi_dung = fields.Text(string='Nội dung tin nhắn', required=True)
     da_doc = fields.Boolean(string='Đã đọc', default=False)
     ngay_gui = fields.Datetime(string='Thời gian gửi', default=fields.Datetime.now, readonly=True)
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        is_bcn = self.env.user.has_group('quanly_datn.group_datn_ban_chu_nhiem')
+        for vals in vals_list:
+            de_tai = self.env['quanly.detai'].browse(vals.get('de_tai_id'))
+            if not de_tai.exists():
+                raise UserError(_('Cần chọn đề tài hợp lệ.'))
+            if not is_bcn and self.env.user not in (de_tai.sinh_vien_id.user_id | de_tai.giang_vien_huong_dan_id.user_id):
+                raise AccessError(_('Chỉ sinh viên thực hiện hoặc giảng viên hướng dẫn được gửi tin nhắn.'))
+            vals['nguoi_gui_id'] = self.env.user.id
+            vals['da_doc'] = False
+        return super().create(vals_list)
+
+    def write(self, vals):
+        if not self.env.user.has_group('quanly_datn.group_datn_ban_chu_nhiem'):
+            if any(rec.nguoi_gui_id != self.env.user for rec in self) or not set(vals).issubset({'noi_dung'}):
+                raise AccessError(_('Bạn chỉ được sửa nội dung tin nhắn do mình gửi.'))
+        if 'noi_dung' in vals:
+            vals = dict(vals, da_doc=False)
+        return super().write(vals)
+
+    def action_danh_dau_da_doc(self):
+        for rec in self:
+            recipients = rec.de_tai_id.sinh_vien_id.user_id | rec.de_tai_id.giang_vien_huong_dan_id.user_id
+            if self.env.user not in recipients or rec.nguoi_gui_id == self.env.user:
+                raise AccessError(_('Chỉ người nhận mới được đánh dấu tin nhắn đã đọc.'))
+        unread = self.filtered(lambda rec: not rec.da_doc)
+        if unread:
+            super(TinNhan, unread).write({'da_doc': True})
 

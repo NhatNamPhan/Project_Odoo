@@ -1,178 +1,164 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <odoo>
-    <!-- Đợt đồ án -->
     <record id="view_dotdoan_tree" model="ir.ui.view">
         <field name="name">quanly.dotdoan.list</field>
         <field name="model">quanly.dotdoan</field>
         <field name="arch" type="xml">
             <list string="Đợt làm đồ án">
-                <field name="ma_dot"/>
-                <field name="ten_dot"/>
-                <field name="nien_khoa"/>
-                <field name="hoc_ky"/>
-                <field name="ngay_bat_dau"/>
-                <field name="ngay_bat_dau_bao_ve"/>
-                <field name="trang_thai"/>
+                <field name="ma_dot" />
+                <field name="ten_dot" />
+                <field name="nien_khoa" />
+                <field name="hoc_ky" />
+                <field name="ngay_bat_dau" />
+                <field name="ngay_bat_dau_bao_ve" optional="hide" />
+                <field name="trang_thai" />
             </list>
         </field>
     </record>
-
     <record id="view_dotdoan_form" model="ir.ui.view">
         <field name="name">quanly.dotdoan.form</field>
         <field name="model">quanly.dotdoan</field>
         <field name="arch" type="xml">
             <form string="Đợt làm đồ án">
                 <header>
-                    <field name="trang_thai" widget="statusbar" statusbar_visible="chuan_bi,dang_dang_ky,dang_thuc_hien,dang_bao_ve,ket_thuc"/>
+                    <button name="action_mo_dang_ky" type="object" string="Mở đăng ký" class="btn-primary" groups="quanly_datn.group_datn_ban_chu_nhiem" invisible="trang_thai != 'chuan_bi'" confirm="Mở đăng ký đề tài cho sinh viên trong đợt này?" />
+                    <button name="action_bat_dau_thuc_hien" type="object" string="Đóng đăng ký / Bắt đầu thực hiện" groups="quanly_datn.group_datn_ban_chu_nhiem" invisible="trang_thai != 'dang_dang_ky'" confirm="Đóng đăng ký mới và chuyển sang thực hiện đồ án?" />
+                    <button name="action_bat_dau_bao_ve" type="object" string="Bắt đầu bảo vệ" groups="quanly_datn.group_datn_ban_chu_nhiem" invisible="trang_thai != 'dang_thuc_hien'" />
+                    <button name="action_ket_thuc" type="object" string="Kết thúc đợt" groups="quanly_datn.group_datn_ban_chu_nhiem" invisible="trang_thai != 'dang_bao_ve'" confirm="Xác nhận kết thúc đợt đồ án?" />
+                    <field name="trang_thai" widget="statusbar" statusbar_visible="chuan_bi,dang_dang_ky,dang_thuc_hien,dang_bao_ve,ket_thuc" readonly="1" />
                 </header>
                 <sheet>
                     <group>
                         <group string="Thông tin cơ bản">
-                            <field name="ma_dot"/>
-                            <field name="ten_dot"/>
-                            <field name="nien_khoa"/>
-                            <field name="hoc_ky"/>
+                            <field name="ma_dot" readonly="trang_thai == 'ket_thuc'" />
+                            <field name="ten_dot" readonly="trang_thai == 'ket_thuc'" />
+                            <field name="nien_khoa" readonly="trang_thai == 'ket_thuc'" />
+                            <field name="hoc_ky" readonly="trang_thai == 'ket_thuc'" />
                         </group>
                         <group string="Kế hoạch thời gian">
-                            <field name="ngay_bat_dau"/>
-                            <field name="ngay_bat_dau_bao_ve"/>
-                            <field name="ngay_ket_thuc_bao_ve"/>
+                            <field name="ngay_bat_dau" readonly="trang_thai == 'ket_thuc'" />
+                            <field name="ngay_bat_dau_bao_ve" readonly="trang_thai == 'ket_thuc'" />
+                            <field name="ngay_ket_thuc_bao_ve" readonly="trang_thai == 'ket_thuc'" />
                         </group>
                     </group>
                     <group string="Trọng số cấu thành điểm tốt nghiệp">
                         <group>
-                            <field name="trong_so_gvhd"/>
-                            <field name="trong_so_bao_cao"/>
+                            <field name="trong_so_gvhd" readonly="trang_thai == 'ket_thuc'" />
+                            <field name="trong_so_bao_cao" readonly="trang_thai == 'ket_thuc'" />
                         </group>
                         <group>
-                            <field name="trong_so_do_an"/>
+                            <field name="trong_so_do_an" readonly="trang_thai == 'ket_thuc'" />
                         </group>
                     </group>
                     <notebook>
                         <page string="Danh sách Đăng ký">
-                            <field name="dang_ky_ids"/>
+                            <field name="dang_ky_ids" readonly="trang_thai == 'ket_thuc'" />
                         </page>
                         <page string="Ngân hàng đề tài đợt này">
-                            <field name="ngan_hang_de_tai_ids"/>
+                            <field name="ngan_hang_de_tai_ids" readonly="trang_thai == 'ket_thuc'" />
                         </page>
                         <page string="Cấu hình Đợt nộp báo cáo">
-                            <field name="dot_bao_cao_ids"/>
+                            <field name="dot_bao_cao_ids" readonly="trang_thai == 'ket_thuc'" />
                         </page>
                         <page string="Hội đồng bảo vệ">
-                            <field name="hoi_dong_ids"/>
+                            <field name="hoi_dong_ids" readonly="trang_thai == 'ket_thuc'" />
                         </page>
                     </notebook>
                 </sheet>
             </form>
         </field>
     </record>
-
     <record id="action_dotdoan" model="ir.actions.act_window">
         <field name="name">Đợt làm đồ án tốt nghiệp</field>
         <field name="res_model">quanly.dotdoan</field>
         <field name="view_mode">list,form</field>
     </record>
-
-    <!-- Đăng ký đợt -->
     <record id="view_dangky_tree" model="ir.ui.view">
         <field name="name">quanly.dangky.list</field>
         <field name="model">quanly.dangky</field>
         <field name="arch" type="xml">
             <list string="Danh sách đăng ký">
-                <field name="sinh_vien_id"/>
-                <field name="dot_do_an_id"/>
-                <field name="ngay_dang_ky"/>
-                <field name="trang_thai"/>
+                <field name="sinh_vien_id" />
+                <field name="dot_do_an_id" />
+                <field name="ngay_dang_ky" />
+                <field name="trang_thai" />
             </list>
         </field>
     </record>
-
     <record id="view_dangky_form" model="ir.ui.view">
         <field name="name">quanly.dangky.form</field>
         <field name="model">quanly.dangky</field>
         <field name="arch" type="xml">
             <form string="Đăng ký đợt đồ án">
                 <header>
-                    <button name="action_duyet" type="object" string="Duyệt đăng ký" class="btn-primary"
-                            groups="quanly_datn.group_datn_ban_chu_nhiem" invisible="trang_thai != 'cho_duyet'"/>
-                    <button name="action_tu_choi" type="object" string="Từ chối" confirm="Bạn có chắc muốn từ chối đăng ký này?"
-                            groups="quanly_datn.group_datn_ban_chu_nhiem" invisible="trang_thai != 'cho_duyet'"/>
-                    <field name="trang_thai" widget="statusbar" statusbar_visible="cho_duyet,da_duyet,tu_choi"/>
+                    <button name="action_duyet" type="object" string="Duyệt đăng ký" class="btn-primary" groups="quanly_datn.group_datn_ban_chu_nhiem" invisible="trang_thai != 'cho_duyet'" />
+                    <button name="action_tu_choi" type="object" string="Từ chối" confirm="Bạn có chắc muốn từ chối đăng ký này?" groups="quanly_datn.group_datn_ban_chu_nhiem" invisible="trang_thai != 'cho_duyet'" />
+                    <field name="trang_thai" widget="statusbar" statusbar_visible="cho_duyet,da_duyet,tu_choi" readonly="1" />
                 </header>
                 <sheet>
                     <group>
-                        <field name="sinh_vien_id"/>
-                        <field name="dot_do_an_id"/>
-                        <field name="ngay_dang_ky"/>
+                        <field name="sinh_vien_id" />
+                        <field name="dot_do_an_id" />
+                        <field name="ngay_dang_ky" />
                     </group>
                 </sheet>
             </form>
         </field>
     </record>
-
     <record id="action_dangky" model="ir.actions.act_window">
         <field name="name">Đăng ký đợt đồ án</field>
         <field name="res_model">quanly.dangky</field>
         <field name="view_mode">list,form</field>
     </record>
-
-    <!-- Ngân hàng đề tài -->
     <record id="view_nganhangdetai_tree" model="ir.ui.view">
         <field name="name">quanly.nganhangdetai.list</field>
         <field name="model">quanly.nganhangdetai</field>
         <field name="arch" type="xml">
             <list string="Ngân hàng đề tài">
-                <field name="ten_de_tai"/>
-                <field name="dot_do_an_id"/>
-                <field name="chuyen_nganh_id"/>
-                <field name="loai_de_tai"/>
-                <field name="trang_thai"/>
+                <field name="ten_de_tai" />
+                <field name="dot_do_an_id" />
+                <field name="chuyen_nganh_id" />
+                <field name="loai_de_tai" />
+                <field name="trang_thai" />
             </list>
         </field>
     </record>
-
     <record id="view_nganhangdetai_form" model="ir.ui.view">
         <field name="name">quanly.nganhangdetai.form</field>
         <field name="model">quanly.nganhangdetai</field>
         <field name="arch" type="xml">
             <form string="Đề tài đề xuất">
                 <header>
-                    <button name="action_duyet" type="object" string="Duyệt đề tài" class="btn-primary"
-                            groups="quanly_datn.group_datn_ban_chu_nhiem" invisible="trang_thai not in ['du_thao', 'cho_duyet']"/>
-                    <button name="action_tu_choi" type="object" string="Từ chối" confirm="Bạn có chắc muốn từ chối đề tài đề xuất này?"
-                            groups="quanly_datn.group_datn_ban_chu_nhiem" invisible="trang_thai not in ['du_thao', 'cho_duyet']"/>
-                    <field name="trang_thai" widget="statusbar" statusbar_visible="du_thao,cho_duyet,da_duyet,da_chon,tu_choi"/>
+                    <button name="action_duyet" type="object" string="Duyệt đề tài" class="btn-primary" groups="quanly_datn.group_datn_ban_chu_nhiem" invisible="trang_thai not in ['du_thao', 'cho_duyet']" />
+                    <button name="action_tu_choi" type="object" string="Từ chối" confirm="Bạn có chắc muốn từ chối đề tài đề xuất này?" groups="quanly_datn.group_datn_ban_chu_nhiem" invisible="trang_thai not in ['du_thao', 'cho_duyet']" />
+                    <field name="trang_thai" widget="statusbar" statusbar_visible="du_thao,cho_duyet,da_duyet,da_chon,tu_choi" readonly="1" />
                 </header>
                 <sheet>
                     <group>
                         <group>
-                            <field name="ten_de_tai"/>
-                            <field name="dot_do_an_id"/>
-                            <field name="chuyen_nganh_id"/>
+                            <field name="ten_de_tai" />
+                            <field name="dot_do_an_id" />
+                            <field name="chuyen_nganh_id" />
                         </group>
                         <group>
-                            <field name="loai_de_tai"/>
-                            <field name="giang_vien_de_xuat_id" invisible="loai_de_tai != 'gv_de_xuat'"/>
-                            <field name="sinh_vien_de_xuat_id" invisible="loai_de_tai != 'sv_de_xuat'"/>
+                            <field name="loai_de_tai" />
+                            <field name="giang_vien_de_xuat_id" invisible="loai_de_tai != 'gv_de_xuat'" />
+                            <field name="sinh_vien_de_xuat_id" invisible="loai_de_tai != 'sv_de_xuat'" />
                         </group>
                     </group>
                     <group string="Mô tả mục tiêu &amp; Yêu cầu">
-                        <field name="mo_ta" nolabel="1"/>
+                        <field name="mo_ta" nolabel="1" />
                     </group>
                 </sheet>
             </form>
         </field>
     </record>
-
     <record id="action_nganhangdetai" model="ir.actions.act_window">
         <field name="name">Ngân hàng Đề tài đề xuất</field>
         <field name="res_model">quanly.nganhangdetai</field>
         <field name="view_mode">list,form</field>
     </record>
-
-    <!-- Menu Items -->
-    <menuitem id="menu_dotdoan" name="Đợt làm đồ án" parent="menu_sub_dot_doan_root" action="action_dotdoan" sequence="10"/>
-    <menuitem id="menu_dangky" name="Danh sách đăng ký" parent="menu_sub_dot_doan_root" action="action_dangky" sequence="20"/>
-    <menuitem id="menu_nganhangdetai" name="Ngân hàng đề tài" parent="menu_sub_dot_doan_root" action="action_nganhangdetai" sequence="30"/>
+    <menuitem id="menu_dotdoan" name="Đợt làm đồ án" parent="menu_sub_dot_doan_root" action="action_dotdoan" sequence="10" />
+    <menuitem id="menu_dangky" name="Danh sách đăng ký" parent="menu_sub_dot_doan_root" action="action_dangky" sequence="20" />
+    <menuitem id="menu_nganhangdetai" name="Ngân hàng đề tài" parent="menu_sub_dot_doan_root" action="action_nganhangdetai" sequence="30" />
 </odoo>
-

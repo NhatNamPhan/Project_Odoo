@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Quản Lý Đồ Án Tốt Nghiệp',
-    'version': '18.0.1.0.0',
+    'version': '18.0.1.3.0',
     'category': 'Education',
     'summary': 'Hệ thống Quản lý Đồ án tốt nghiệp cho Khoa Công nghệ số',
     'description': """

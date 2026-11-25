@@ -1,136 +1,149 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <odoo>
-    <!-- Đề tài chính thức -->
     <record id="view_detai_tree" model="ir.ui.view">
         <field name="name">quanly.detai.list</field>
         <field name="model">quanly.detai</field>
         <field name="arch" type="xml">
             <list string="Danh sách đề tài">
-                <field name="ma_de_tai"/>
-                <field name="ten_de_tai"/>
-                <field name="sinh_vien_id"/>
-                <field name="giang_vien_huong_dan_id"/>
-                <field name="dot_do_an_id"/>
-                <field name="hoi_dong_id"/>
-                <field name="diem_tong_ket"/>
-                <field name="xep_loai"/>
-                <field name="trang_thai"/>
+                <field name="ma_de_tai" />
+                <field name="ten_de_tai" />
+                <field name="sinh_vien_id" />
+                <field name="giang_vien_huong_dan_id" />
+                <field name="dot_do_an_id" optional="hide" />
+                <field name="hoi_dong_id" optional="hide" />
+                <field name="diem_tong_ket" string="Điểm tổng kết" />
+                <field name="xep_loai" widget="badge" />
+                <field name="trang_thai" string="Trạng thái" widget="badge" />
             </list>
         </field>
     </record>
-
     <record id="view_detai_form" model="ir.ui.view">
         <field name="name">quanly.detai.form</field>
         <field name="model">quanly.detai</field>
         <field name="arch" type="xml">
             <form string="Đề tài tốt nghiệp">
                 <header>
-                    <button name="action_gui_xac_nhan_bao_ve" type="object" string="Gửi yêu cầu bảo vệ" class="btn-primary"
-                            groups="quanly_datn.group_datn_sinh_vien" invisible="trang_thai != 'dang_thuc_hien'"/>
-                    <button name="action_xac_nhan_bao_ve" type="object" string="Xác nhận đủ điều kiện bảo vệ" class="btn-primary"
-                            groups="quanly_datn.group_datn_giang_vien" invisible="trang_thai != 'cho_xac_nhan_bao_ve'"/>
-                    <button name="action_tu_choi_bao_ve" type="object" string="Không đủ điều kiện" confirm="Bạn có chắc muốn từ chối điều kiện bảo vệ?"
-                            groups="quanly_datn.group_datn_giang_vien" invisible="trang_thai != 'cho_xac_nhan_bao_ve'"/>
-                    <field name="trang_thai" widget="statusbar" statusbar_visible="dang_thuc_hien,cho_xac_nhan_bao_ve,cho_bao_ve,khong_duoc_bao_ve,da_bao_ve,da_luu_chieu"/>
+                    <button name="action_xac_nhan_diem_gvhd" type="object" string="Xác nhận điểm GVHD" invisible="not ui_reviewer or diem_gvhd_da_nhap or da_khoa_diem" confirm="Xác nhận điểm GVHD hiện tại, kể cả điểm 0?"/>
+                    <button name="action_cho_lam_lai" type="object" string="Cho phép bổ sung báo cáo" invisible="not ui_reviewer or trang_thai != 'khong_duoc_bao_ve'" />
+                    <button name="action_luu_chieu" type="object" string="Xác nhận lưu chiểu" invisible="not ui_manager or trang_thai != 'da_bao_ve'" />
+                    <button name="action_gui_xac_nhan_bao_ve" type="object" string="Gửi yêu cầu bảo vệ" class="btn-primary" groups="quanly_datn.group_datn_sinh_vien" invisible="not ui_owner or trang_thai != 'dang_thuc_hien'" />
+                    <button name="action_xac_nhan_bao_ve" type="object" string="Xác nhận đủ điều kiện bảo vệ" class="btn-primary" groups="quanly_datn.group_datn_giang_vien" invisible="not ui_reviewer or trang_thai != 'cho_xac_nhan_bao_ve'" />
+                    <button name="action_tu_choi_bao_ve" type="object" string="Không đủ điều kiện" confirm="Bạn có chắc muốn từ chối điều kiện bảo vệ?" groups="quanly_datn.group_datn_giang_vien" invisible="not ui_reviewer or trang_thai != 'cho_xac_nhan_bao_ve'" />
+                    <field name="trang_thai" widget="statusbar" statusbar_visible="dang_thuc_hien,cho_xac_nhan_bao_ve,cho_bao_ve,khong_duoc_bao_ve,da_bao_ve,da_luu_chieu" readonly="1" />
                 </header>
                 <sheet>
                     <div class="oe_title">
-                        <label for="ma_de_tai" string="Mã đề tài"/>
+                        <label for="ma_de_tai" string="Mã đề tài" />
                         <h1>
-                            <field name="ma_de_tai" placeholder="VD: DT2026_01"/>
+                            <field name="ma_de_tai" placeholder="VD: DT2026_01" readonly="not ui_manager" />
                         </h1>
-                        <label for="ten_de_tai" string="Tên đề tài"/>
+                        <label for="ten_de_tai" string="Tên đề tài" />
                         <h2>
-                            <field name="ten_de_tai" placeholder="Tên đề tài đồ án tốt nghiệp..."/>
+                            <field name="ten_de_tai" placeholder="Tên đề tài đồ án tốt nghiệp..." readonly="not ui_manager" />
                         </h2>
                     </div>
                     <group>
                         <group string="Phân công">
-                            <field name="dang_ky_id"/>
-                            <field name="sinh_vien_id"/>
-                            <field name="giang_vien_huong_dan_id"/>
-                            <field name="dot_do_an_id"/>
+                            <field name="dang_ky_id" readonly="not ui_manager" domain="[('trang_thai', '=', 'da_duyet')]" />
+                            <field name="ngan_hang_de_tai_id" readonly="not ui_manager" domain="[('dot_do_an_id', '=', dot_do_an_id), ('trang_thai', 'in', ['da_duyet', 'da_chon'])]"/>
+                            <field name="sinh_vien_id" />
+                            <field name="giang_vien_huong_dan_id" readonly="not ui_manager" />
+                            <field name="dot_do_an_id" />
                         </group>
                         <group string="Hội đồng &amp; Kết quả">
-                            <field name="hoi_dong_id"/>
-                            <field name="gvhd_da_duyet"/>
-                            <field name="diem_gvhd"/>
-                            <field name="diem_bao_cao_tb"/>
-                            <field name="diem_do_an_tb"/>
-                            <field name="diem_tong_ket"/>
-                            <field name="xep_loai"/>
-                            <field name="da_khoa_diem"/>
+                            <field name="hoi_dong_id" readonly="not ui_manager" domain="[('dot_do_an_id', '=', dot_do_an_id)]" />
+                            <field name="gvhd_da_duyet" readonly="1" />
+                            <field name="diem_gvhd" readonly="not ui_reviewer or da_khoa_diem" />
+                            <field name="diem_gvhd_da_nhap" readonly="1"/>
+                            <field name="nhan_xet_tong_ket" readonly="not ui_reviewer"/>
+                            <field name="diem_bao_cao_tb" />
+                            <field name="diem_do_an_tb" />
+                            <field name="diem_tong_ket" />
+                            <div class="text-muted" colspan="2" invisible="xep_loai != 'chua_du_diem'">Điểm đang tạm tính; xếp loại sau khi đủ phiếu chấm của các thành viên hội đồng.</div>
+                            <field name="xep_loai" />
+                            <field name="da_khoa_diem" readonly="not ui_manager or trang_thai in ('da_bao_ve', 'da_luu_chieu')" />
                         </group>
                     </group>
                     <group string="Đường dẫn liên kết">
                         <group>
-                            <field name="link_github" widget="url"/>
+                            <field name="link_github" widget="url" readonly="not (ui_manager or ui_owner)" />
                         </group>
                         <group>
-                            <field name="link_demo" widget="url"/>
+                            <field name="link_demo" widget="url" readonly="not (ui_manager or ui_owner)" />
                         </group>
                     </group>
                     <notebook>
                         <page string="Nội dung mô tả đề tài">
-                            <field name="mo_ta" placeholder="Mô tả chi tiết nội dung, kiến trúc, công nghệ..."/>
+                            <field name="mo_ta" placeholder="Mô tả chi tiết nội dung, kiến trúc, công nghệ..." readonly="not (ui_manager or ui_owner)" />
                         </page>
                         <page string="Tiến độ Báo cáo định kỳ">
-                            <field name="bao_cao_ids"/>
+                            <field name="bao_cao_ids" readonly="1" />
                         </page>
                         <page string="Hình ảnh Demo / Showcase sản phẩm (Lưu chiểu)">
-                            <field name="hinh_anh_ids">
+                            <field name="hinh_anh_ids" readonly="1">
                                 <list>
-                                    <field name="ten_hinh"/>
-                                    <field name="hinh_anh" widget="image" options="{'size': [64, 64]}"/>
-                                    <field name="mo_ta"/>
+                                    <field name="ten_hinh" />
+                                    <field name="hinh_anh" widget="image" options="{'size': [64, 64]}" />
+                                    <field name="mo_ta" />
                                 </list>
                                 <form>
                                     <group>
-                                        <field name="ten_hinh"/>
-                                        <field name="hinh_anh" widget="image"/>
-                                        <field name="url"/>
-                                        <field name="mo_ta"/>
+                                        <field name="ten_hinh" />
+                                        <field name="hinh_anh" widget="image" />
+                                        <field name="url" />
+                                        <field name="mo_ta" />
                                     </group>
                                 </form>
                             </field>
                         </page>
                         <page string="Phiếu chấm điểm Hội đồng">
-                            <field name="phieu_cham_diem_ids"/>
+                            <field name="phieu_cham_diem_ids" readonly="1" />
                         </page>
                     </notebook>
                 </sheet>
+                <field name="ui_manager" invisible="1" />
+                <field name="ui_reviewer" invisible="1" />
+                <field name="ui_owner" invisible="1" />
             </form>
         </field>
     </record>
-
     <record id="action_detai" model="ir.actions.act_window">
         <field name="name">Đề tài tốt nghiệp</field>
         <field name="res_model">quanly.detai</field>
         <field name="view_mode">list,form</field>
     </record>
-
-    <!-- Thư viện hình ảnh đề tài -->
     <record id="view_hinhanhdetai_tree" model="ir.ui.view">
         <field name="name">quanly.hinhanhdetai.list</field>
         <field name="model">quanly.hinhanhdetai</field>
         <field name="arch" type="xml">
             <list string="Hình ảnh sản phẩm">
-                <field name="de_tai_id"/>
-                <field name="ten_hinh"/>
-                <field name="hinh_anh" widget="image" options="{'size': [50, 50]}"/>
-                <field name="mo_ta"/>
+                <field name="de_tai_id" />
+                <field name="ten_hinh" />
+                <field name="hinh_anh" widget="image" options="{'size': [50, 50]}" />
+                <field name="mo_ta" />
             </list>
         </field>
     </record>
-
+    <record id="view_hinhanhdetai_form" model="ir.ui.view">
+        <field name="name">quanly.hinhanhdetai.form</field>
+        <field name="model">quanly.hinhanhdetai</field>
+        <field name="arch" type="xml">
+            <form string="Ảnh sản phẩm">
+                <sheet><group>
+                    <field name="de_tai_id"/>
+                    <field name="ten_hinh"/>
+                    <field name="hinh_anh" widget="image"/>
+                    <field name="url" widget="url"/>
+                    <field name="mo_ta"/>
+                </group></sheet>
+            </form>
+        </field>
+    </record>
     <record id="action_hinhanhdetai" model="ir.actions.act_window">
         <field name="name">Thư viện ảnh sản phẩm đề tài</field>
         <field name="res_model">quanly.hinhanhdetai</field>
         <field name="view_mode">list,form</field>
     </record>
-
-    <!-- Menu Items -->
-    <menuitem id="menu_detai" name="Đề tài tốt nghiệp" parent="menu_sub_de_tai_root" action="action_detai" sequence="10"/>
-    <menuitem id="menu_hinhanhdetai" name="Thư viện ảnh Showcase" parent="menu_sub_de_tai_root" action="action_hinhanhdetai" sequence="20"/>
+    <menuitem id="menu_detai" name="Đề tài tốt nghiệp" parent="menu_sub_de_tai_root" action="action_detai" sequence="10" />
+    <menuitem id="menu_hinhanhdetai" name="Thư viện ảnh Showcase" parent="menu_sub_de_tai_root" action="action_hinhanhdetai" sequence="20" />
 </odoo>
-

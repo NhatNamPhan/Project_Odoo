@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from odoo import models, fields, api, _
-from odoo.exceptions import ValidationError
+from odoo.exceptions import AccessError, ValidationError
+import secrets
 
 class SinhVien(models.Model):
+    _inherit = 'quanly.ui.permissions'
     _name = 'quanly.sinhvien'
     _description = 'Thông tin sinh viên'
     _rec_name = 'ho_ten'
@@ -43,6 +45,7 @@ class SinhVien(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
+        self.check_access('create')
         group_sv = self.env.ref('quanly_datn.group_datn_sinh_vien', raise_if_not_found=False)
         group_internal = self.env.ref('base.group_user')
         groups = [group_internal.id]
@@ -58,25 +61,21 @@ class SinhVien(models.Model):
 
             if not vals.get('user_id') and email:
                 user = self.env['res.users'].sudo().search([('login', '=', email)], limit=1)
-                if not user:
-                    user = self.env['res.users'].sudo().create({
-                        'name': name,
-                        'login': email,
-                        'email': email,
-                        'password': '123456',
-                        'groups_id': [(6, 0, groups)],
-                    })
-                else:
-                    existing_sv = self.search([('user_id', '=', user.id)], limit=1)
-                    if existing_sv:
-                        raise ValidationError(
-                            _(f"Email '{email}' đã được liên kết với sinh viên '{existing_sv.ho_ten}' (MSSV: {existing_sv.ma_sv}). "
-                              f"Vui lòng sử dụng email khác.")
-                        )
+                if user:
+                    raise ValidationError(_('Email đã có tài khoản. Hãy liên kết tài khoản hiện có trong hồ sơ.'))
+                user = self.env['res.users'].sudo().create({
+                    'name': name,
+                    'login': email,
+                    'email': email,
+                    'password': secrets.token_urlsafe(24),
+                    'groups_id': [(6, 0, groups)],
+                })
                 vals['user_id'] = user.id
         return super().create(vals_list)
 
     def write(self, vals):
+        if not self.env.user.has_group('quanly_datn.group_datn_ban_chu_nhiem') and not set(vals).issubset({'sdt'}):
+            raise AccessError(_('Sinh viên chỉ được sửa số điện thoại trong hồ sơ.'))
         res = super().write(vals)
         for rec in self:
             if rec.user_id:
@@ -92,6 +91,7 @@ class SinhVien(models.Model):
 
 
 class GiangVien(models.Model):
+    _inherit = 'quanly.ui.permissions'
     _name = 'quanly.giangvien'
     _description = 'Thông tin giảng viên'
     _rec_name = 'ho_ten'
@@ -128,6 +128,7 @@ class GiangVien(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
+        self.check_access('create')
         group_gv = self.env.ref('quanly_datn.group_datn_giang_vien', raise_if_not_found=False)
         group_internal = self.env.ref('base.group_user')
         groups = [group_internal.id]
@@ -143,25 +144,21 @@ class GiangVien(models.Model):
 
             if not vals.get('user_id') and email:
                 user = self.env['res.users'].sudo().search([('login', '=', email)], limit=1)
-                if not user:
-                    user = self.env['res.users'].sudo().create({
-                        'name': name,
-                        'login': email,
-                        'email': email,
-                        'password': '123456',
-                        'groups_id': [(6, 0, groups)],
-                    })
-                else:
-                    existing_gv = self.search([('user_id', '=', user.id)], limit=1)
-                    if existing_gv:
-                        raise ValidationError(
-                            _(f"Email '{email}' đã được liên kết với giảng viên '{existing_gv.ho_ten}' (Mã GV: {existing_gv.ma_gv}). "
-                              f"Vui lòng sử dụng email khác.")
-                        )
+                if user:
+                    raise ValidationError(_('Email đã có tài khoản. Hãy liên kết tài khoản hiện có trong hồ sơ.'))
+                user = self.env['res.users'].sudo().create({
+                    'name': name,
+                    'login': email,
+                    'email': email,
+                    'password': secrets.token_urlsafe(24),
+                    'groups_id': [(6, 0, groups)],
+                })
                 vals['user_id'] = user.id
         return super().create(vals_list)
 
     def write(self, vals):
+        if not self.env.user.has_group('quanly_datn.group_datn_ban_chu_nhiem') and not set(vals).issubset({'sdt'}):
+            raise AccessError(_('Giảng viên chỉ được sửa số điện thoại trong hồ sơ.'))
         res = super().write(vals)
         for rec in self:
             if rec.user_id:
